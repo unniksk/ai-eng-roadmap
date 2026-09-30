@@ -7,10 +7,11 @@ No build step and no dependencies. Progress is saved in your browser's `localSto
 ## Structure
 
 ```
-index.html            page shell
-assets/css/style.css  styles (light + dark mode)
+index.html            sidebar, Guide view and Tracker view (switch top right)
+assets/css/style.css  guide + tracker styles (dark mode via prefers-color-scheme)
 assets/js/data.js     all sections and items (edit this to update content)
-assets/js/app.js      rendering, progress, export/import
+assets/js/guide.js    guide search/filter, Guide/Tracker switch
+assets/js/app.js      tracker rendering, progress, export/import
 404.html              redirects to the tracker
 .nojekyll             tells GitHub Pages to serve files as-is
 ```
