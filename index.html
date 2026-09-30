@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Personal AI engineering learning tracker: handbook chapters, role gaps, O'Reilly reading list and hands-on labs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<title>AI Engineering Progress Tracker</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="header">
+  <h1>🎯 AI Engineering Progress Tracker</h1>
+  <p>From handbook to interview-ready. Now includes role gaps for Principal AI Platform roles, an O'Reilly reading list, and hands-on labs.</p>
+</div>
+<div class="dash">
+  <div class="ir"><div class="ir-num" id="irScore">0%</div><div><h3>Interview Readiness Score</h3><p id="irDesc"></p><span class="ir-level" id="irLevel"></span></div></div>
+  <div class="stats">
+    <div class="stat"><b id="sTotal">0</b><span>Total items</span></div>
+    <div class="stat"><b id="sDone">0</b><span>Completed</span></div>
+    <div class="stat"><b id="sSec">0</b><span>Sections started</span></div>
+    <div class="stat"><b id="sToday">0</b><span>Done today</span></div>
+  </div>
+  <div class="overall"><h3>Overall progress <span id="oPct" style="color:var(--primary)">0%</span></h3><div class="bar"><div class="fill" id="oBar" style="width:0"></div></div></div>
+  <div class="actions">
+    <button class="btn" onclick="setAll(true)">Expand all</button>
+    <button class="btn" onclick="setAll(false)">Collapse all</button>
+    <button class="btn" onclick="showIncomplete()">Show incomplete</button>
+    <button class="btn" onclick="exportProgress()">Export progress</button>
+    <button class="btn" onclick="document.getElementById('imp').click()">Import progress</button>
+    <input type="file" id="imp" class="btn-file" accept="application/json" onchange="importProgress(this)">
+    <button class="btn danger" onclick="resetAll()">Reset all</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
