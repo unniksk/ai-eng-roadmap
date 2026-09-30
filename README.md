@@ -26,12 +26,12 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 ## Deploy to GitHub Pages
 
 ```zsh
-gh repo create ai-engineering-tracker --public --source=. --push
-gh api -X POST repos/{owner}/ai-engineering-tracker/pages -f "source[branch]=main" -f "source[path]=/"
+gh repo create ai-eng --public --source=. --push
+gh api -X POST repos/{owner}/ai-eng/pages -f "source[branch]=main" -f "source[path]=/"
 ```
 
 Or in the browser: **Settings → Pages → Deploy from a branch → `main` / root**.
-The site appears at `https://<username>.github.io/ai-engineering-tracker/`.
+The site appears at `https://<username>.github.io/ai-eng/`.
 
 ## Editing content
 
