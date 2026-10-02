@@ -231,5 +231,18 @@ window.TRACKER_SECTIONS=[
 ['m-2','Preference tuning: DPO and RLHF','What each optimizes and what data it needs.'],
 ['m-5','Quantization','GPTQ, AWQ, int8 vs 4-bit; quality and speed tradeoffs.'],
 ['m-7','Mixture of Experts (MoE)','Sparse activation, router, why serving is harder.'],
-['m-8','CUDA and kernel optimization','Memory-bound vs compute-bound; Triton, FlashAttention.']]}
+['m-8','CUDA and kernel optimization','Memory-bound vs compute-bound; Triton, FlashAttention.']]},
+{id:'sysdesign',c:'cp',icon:'🏗',isNew:1,t:'Advanced · System design in the LLM era',d:'The serving stack from request to GPU and back: routing, batching, KV cache, scaling, tenancy and cost.',items:[
+['sd-1','Streaming request path and gateway','SSE streaming, TTFT vs TPOT, token-based rate limits, tenant and priority stamping.','system-design.html'],
+['sd-2','Prefix-aware routing','Chain-hashed KV blocks, cache-vs-load scoring; put stable prompt parts first.'],
+['sd-3','Continuous batching and the scheduler','Iteration-level batching, admission by free KV blocks, preemption.'],
+['sd-4','KV cache sizing and PagedAttention','Per-token KV cost, paged blocks, FP8 cache, offload to CPU or SSD.'],
+['sd-5','Prefill vs decode and chunked prefill','Compute-bound vs memory-bound phases and why they interfere.'],
+['sd-6','Parallelism: tensor, pipeline, expert, data','What each splits, and which interconnect each needs.'],
+['sd-7','Quantization and speculative decoding','Lossless vs lossy speedups; acceptance rate.'],
+['sd-8','Prefill-decode disaggregation','Separate pools, KV transfer cost, when it pays off.'],
+['sd-9','Autoscaling on queue depth and SLOs','Why GPU utilisation misleads; cold start and warm pools.'],
+['sd-10','GPU sizing for a model and workload','Weights + KV cache + overhead per replica, then replicas for traffic.'],
+['sd-11','Multi-tenancy and cache isolation','Shared read-only weights, per-tenant cache salt, LoRA adapters per customer.'],
+['sd-12','Cost per million tokens','GPU-hour price over tokens per hour; the levers that move it.']]}
 ];

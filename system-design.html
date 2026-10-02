@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How an LLM answers you: the serving stack, stop by stop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#1B2430; --muted:#55606E; --rule:#D5DAE1;
+  --blue:#2F6FDE; --teal:#0E9473; --amber:#C98A00; --magenta:#C2417A;
+  --blue-soft:#E3ECFC; --teal-soft:#DDF3EC; --amber-soft:#FAF0D6; --magenta-soft:#F8E1EB;
+  --idle:#E6E9EE;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141A22; --surface:#1C2430; --ink:#E7ECF2; --muted:#9AA6B4; --rule:#334050;
+  --blue:#6E9BF0; --teal:#3CC59F; --amber:#E3B33D; --magenta:#E57AA8;
+  --blue-soft:#1F2F4D; --teal-soft:#15362E; --amber-soft:#3A3018; --magenta-soft:#3D2030; --idle:#2A3442;}}
+:root[data-theme="dark"]{
+  --bg:#141A22; --surface:#1C2430; --ink:#E7ECF2; --muted:#9AA6B4; --rule:#334050;
+  --blue:#6E9BF0; --teal:#3CC59F; --amber:#E3B33D; --magenta:#E57AA8;
+  --blue-soft:#1F2F4D; --teal-soft:#15362E; --amber-soft:#3A3018; --magenta-soft:#3D2030; --idle:#2A3442;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.65}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.read{max-width:70ch}
+header.hero{padding:56px 0 24px}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;font-weight:800;letter-spacing:-0.02em;margin:0 0 16px;max-width:18ch}
+.hero p.lede{font-size:1.15rem;color:var(--muted);margin:0 0 28px;max-width:60ch}
+.map{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 8px;overflow-x:auto}
+.map svg{display:block;min-width:900px;width:100%;height:auto}
+.map a text{fill:var(--ink);font-size:13px;font-weight:600}
+.map a:hover circle.st{stroke-width:5}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:14px 4px 0;font-size:.9rem;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:22px;height:5px;border-radius:3px;background:var(--c);margin-right:8px;vertical-align:middle}
+.modebar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
+.modebar .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.modebar strong{font-size:.95rem}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:.92rem;border:0;background:none;color:var(--ink);padding:7px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.line-head{margin:64px 0 8px;display:flex;align-items:center;gap:12px}
+.line-head i{display:block;width:48px;height:8px;border-radius:4px;background:var(--c)}
+.line-head h2{margin:0;font-size:1.05rem;font-weight:600;color:var(--muted)}
+section.stop{display:grid;grid-template-columns:56px 1fr;gap:0 18px;padding:28px 0;border-top:1px solid var(--rule)}
+.rail{position:relative;display:flex;justify-content:center}
+.rail::before{content:"";position:absolute;top:0;bottom:-28px;width:8px;background:var(--c);border-radius:4px}
+.dot{position:relative;width:44px;height:44px;border-radius:50%;background:var(--surface);border:6px solid var(--c);display:grid;place-items:center;font-weight:800;font-size:.95rem}
+.stop h3{font-size:clamp(1.4rem,3vw,1.85rem);line-height:1.2;margin:4px 0 14px;font-weight:800;letter-spacing:-0.01em}
+.plain{font-size:1.08rem;max-width:66ch}
+.plain p{margin:0 0 12px}
+.tech{margin-top:14px;background:var(--surface);border:1px solid var(--rule);border-left:6px solid var(--c);border-radius:0 10px 10px 0;padding:16px 20px;max-width:76ch;font-size:.98rem}
+.tech h4{margin:0 0 6px;font-size:.95rem;font-weight:600;color:var(--muted)}
+.tech p{margin:0 0 10px}.tech ul{margin:0 0 10px;padding-left:20px}.tech li{margin:4px 0}
+.tech code,.plain code{font-size:.9em;background:var(--idle);padding:1px 5px;border-radius:4px}
+body[data-mode="plain"] .tech{display:none}
+body[data-mode="tech"] .plain{display:none}
+figure{margin:20px 0 6px;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px;overflow-x:auto}
+figure svg{display:block;width:100%;height:auto;min-width:520px}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+svg .bx{fill:var(--surface);stroke:var(--rule)}
+svg .lbl{fill:var(--ink);font-size:14px;font-weight:600}
+svg .sub{fill:var(--muted);font-size:12px}
+svg .wire{stroke:var(--muted);stroke-width:1.5;fill:none}
+.stat{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.stat div{flex:1 1 180px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-size:1.5rem;font-weight:800;line-height:1.2}
+.stat span{font-size:.88rem;color:var(--muted)}
+.tool{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px;margin:18px 0}
+.tool h4{margin:0 0 12px;font-size:1.05rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px}
+label.f{display:flex;flex-direction:column;font-size:.88rem;color:var(--muted);gap:4px}
+select,input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:7px 10px;width:100%}
+.out{margin-top:16px;font-size:1.05rem}
+.out b{font-size:1.9rem;font-weight:800}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px;background:var(--idle)}
+.bar i{display:block;height:100%}
+.keys{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted)}
+.keys span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--k);vertical-align:-1px}
+.lanes{display:grid;gap:6px;margin-top:12px}
+.lane{display:grid;grid-template-columns:62px repeat(16,1fr);gap:3px;align-items:center;font-size:.8rem;color:var(--muted)}
+.lane i{height:22px;border-radius:3px;display:block}
+.toggle{margin-top:4px}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+.tbl{overflow-x:auto;margin:14px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted)}
+.note{font-size:.9rem;color:var(--muted)}
+footer{padding:48px 0 64px;border-top:1px solid var(--rule);margin-top:48px}
+footer h2{font-size:1.4rem;margin:0 0 12px}
+footer ol{padding-left:20px;font-size:.93rem}
+footer li{margin:5px 0}
+dl.gloss{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:6px 18px;font-size:.95rem;margin:0 0 32px}
+dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
+@media (max-width:640px){
+  section.stop{grid-template-columns:36px 1fr;gap:0 12px}
+  .dot{width:32px;height:32px;border-width:5px;font-size:.8rem}
+  .rail::before{width:6px}
+  dl.gloss{grid-template-columns:1fr}
+  dl.gloss dd{margin-bottom:8px}
+  .lane{grid-template-columns:44px repeat(16,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  #traveller{animation:travel 6s ease-in-out .4s 1 both}
+  @keyframes travel{from{offset-distance:0%}to{offset-distance:100%}}
+}
+</style>
+</head>
+<body data-mode="both">
+
+<header class="hero"><div class="wrap">
+  <p style="margin:0 0 20px"><a href="index.html#sysdesign">&larr; AI Engineering Roadmap</a></p>
+  <h1>What happens between "send" and the first word of the reply</h1>
+  <p class="lede">Follow one message through the machinery that runs a large language model in production: from your app, through the traffic layers, onto the GPUs, and back as a stream of words. Every stop has a plain-English explanation and a technical one.</p>
+  <div class="map" role="navigation" aria-label="Journey map: jump to any stop">
+    <svg viewBox="0 0 1000 190" role="img" aria-labelledby="mapT">
+      <title id="mapT">Journey map with 13 stops across four lines: request path, inside the GPU, scaling, and sharing and cost</title>
+      <path d="M40 95 H270" stroke="var(--blue)" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <path d="M270 95 H560" stroke="var(--teal)" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <path d="M560 95 H800" stroke="var(--amber)" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <path d="M800 95 H960" stroke="var(--magenta)" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <g id="stations"></g>
+      <circle id="traveller" r="7" fill="var(--ink)" style="offset-path:path('M40 95 H960');offset-distance:100%"/>
+    </svg>
+  </div>
+  <div class="legend">
+    <span style="--c:var(--blue)">Request path</span>
+    <span style="--c:var(--teal)">Inside the GPU</span>
+    <span style="--c:var(--amber)">Scaling</span>
+    <span style="--c:var(--magenta)">Sharing and cost</span>
+  </div>
+</div></header>
+
+<div class="modebar"><div class="wrap">
+  <strong id="modeLbl">Reading level</strong>
+  <div class="seg" role="group" aria-labelledby="modeLbl">
+    <button type="button" data-m="plain" aria-pressed="false">Plain English</button>
+    <button type="button" data-m="tech" aria-pressed="false">Technical</button>
+    <button type="button" data-m="both" aria-pressed="true">Both</button>
+  </div>
+</div></div>
+
+<main class="wrap">
+
+<div class="line-head" style="--c:var(--blue)"><i></i><h2>Request path: getting your message to the right machine</h2></div>
+
+<section class="stop" id="client" style="--c:var(--blue)">
+  <div class="rail"><div class="dot">1</div></div>
+  <div>
+    <h3>Your app opens one connection and keeps it open</h3>
+    <div class="plain"><p>When you press send, your app makes a single call to the AI provider and then waits on that open line. The reply doesn't arrive as one block. Words are pushed down the line the moment they're written, which is why answers appear to type themselves.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li>An HTTPS <code>POST</code> with <code>stream: true</code>. The server answers with Server-Sent Events: one small event per token or token group, then a final event with usage counts.</li>
+        <li>Everything is asynchronous. The client never blocks a thread per request, and neither does the server.</li>
+        <li>Two numbers define how fast it feels: <b>time to first token (TTFT)</b>, which is mostly prompt processing, and <b>time per output token (TPOT)</b>, the streaming speed after that.</li>
+        <li>Work that isn't interactive goes to a separate batch API: submit a file of requests, poll for results later, and pay less because the provider can run it in idle capacity.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="gateway" style="--c:var(--blue)">
+  <div class="rail"><div class="dot">2</div></div>
+  <div>
+    <h3>The gateway checks who you are and how much you're allowed</h3>
+    <div class="plain"><p>Think of a front desk. It confirms your identity, checks you haven't used up your allowance, and turns away floods of traffic so one heavy user can't slow everyone else down. Nothing about AI happens here yet.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li>An ordinary, stateless web tier, scaled horizontally behind load balancers: TLS termination, API-key auth, and request validation.</li>
+        <li>Rate limits are counted in requests per minute <i>and</i> tokens per minute, because one 200K-token prompt costs as much as hundreds of short ones.</li>
+        <li>It stamps each request with a tenant identity and priority tier. Later layers use these for fair queuing and for keeping each customer's cached data separate (stop 12).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="router" style="--c:var(--blue)">
+  <div class="rail"><div class="dot">3</div></div>
+  <div>
+    <h3>A smart router picks the GPU server that already remembers you</h3>
+    <div class="plain"><p>A provider runs hundreds of identical copies of the model. A naive dispatcher would deal requests out like cards. A smart one notices that a particular server has just handled the earlier part of your conversation and still has those notes in memory, so it sends you there and skips redoing that work. It also avoids servers that are already overloaded.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Chain hashing.</b> The prompt is cut into fixed-size token blocks. Each block's hash includes the previous block's hash, so a block only counts as a match if everything before it matches too.</li>
+        <li><b>A fleet-wide index.</b> In the precise version, engines such as vLLM, SGLang and TensorRT-LLM publish an event every time their cache changes. The router keeps a map from block hash to the servers holding it.</li>
+        <li><b>Scoring.</b> Each candidate gets <code>prefix match − load penalty</code>, where load is KV-cache fullness and queue length. Matching on cache alone would pile everyone sharing a popular system prompt onto one server.</li>
+        <li><b>Measured results.</b> One deployment reported 3× output throughput and 2× faster TTFT versus round-robin (Llama 3.1 70B).</li>
+        <li>The router also holds a central queue, giving one place for fairness, priorities and a "true demand" signal that drives autoscaling (stop 10).</li>
+      </ul>
+    </div>
+    <figure>
+      <svg viewBox="0 0 680 300" role="img" aria-labelledby="rT"><title id="rT">A five-block prompt is scored against three servers. Server A holds four of the five blocks and is chosen.</title>
+        <g font-size="12">
+          <rect x="120" y="20" width="84" height="34" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="162" y="42" text-anchor="middle" class="lbl" style="font-size:12px">System</text>
+          <rect x="212" y="20" width="84" height="34" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="254" y="42" text-anchor="middle" class="lbl" style="font-size:12px">Tools</text>
+          <rect x="304" y="20" width="84" height="34" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="346" y="42" text-anchor="middle" class="lbl" style="font-size:12px">History</text>
+          <rect x="396" y="20" width="84" height="34" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="438" y="42" text-anchor="middle" class="lbl" style="font-size:12px">Turn 4</text>
+          <rect x="488" y="20" width="84" height="34" rx="6" fill="var(--idle)" stroke="var(--rule)"/><text x="530" y="42" text-anchor="middle" class="lbl" style="font-size:12px">New msg</text>
+        </g>
+        <line x1="340" y1="54" x2="340" y2="84" class="wire" marker-end="url(#ah)"/>
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>
+        <rect x="200" y="88" width="280" height="50" rx="8" class="bx"/><text x="340" y="108" text-anchor="middle" class="lbl">Router</text><text x="340" y="126" text-anchor="middle" class="sub">Hash blocks, score servers</text>
+        <path d="M300 138 V164 H130 V188" class="wire" marker-end="url(#ah)"/>
+        <rect x="50" y="192" width="160" height="72" rx="8" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><text x="130" y="214" text-anchor="middle" class="lbl">Server A</text><text x="130" y="234" text-anchor="middle" class="sub">Has 4 of 5 blocks</text><text x="130" y="252" text-anchor="middle" class="sub">Load: medium</text>
+        <rect x="260" y="192" width="160" height="72" rx="8" class="bx"/><text x="340" y="214" text-anchor="middle" class="lbl">Server B</text><text x="340" y="234" text-anchor="middle" class="sub">Has 1 of 5 blocks</text><text x="340" y="252" text-anchor="middle" class="sub">Load: low</text>
+        <rect x="470" y="192" width="160" height="72" rx="8" class="bx"/><text x="550" y="214" text-anchor="middle" class="lbl">Server C</text><text x="550" y="234" text-anchor="middle" class="sub">Has 0 of 5 blocks</text><text x="550" y="252" text-anchor="middle" class="sub">Load: idle</text>
+        <text x="340" y="290" text-anchor="middle" class="sub">Server A wins: only the last block needs computing, and its load is acceptable</text>
+      </svg>
+      <figcaption>Prefix-aware routing. Put the stable parts of a prompt first (system prompt, tools, documents) and the changing parts last, and this match rate climbs.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<div class="line-head" style="--c:var(--teal)"><i></i><h2>Inside the GPU: how one server turns text into tokens</h2></div>
+
+<section class="stop" id="scheduler" style="--c:var(--teal)">
+  <div class="rail"><div class="dot">4</div></div>
+  <div>
+    <h3>Your request joins a moving batch of thousands of others</h3>
+    <div class="plain"><p>A GPU is like a bus that's expensive to run whether it's full or empty, so servers never process one request at a time. The old approach waited until every passenger reached their destination before letting anyone new on. Modern servers let people board at every stop: the moment one reply finishes, a new request takes its seat.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Continuous batching</b> (also called iteration-level scheduling or in-flight batching, from the Orca paper). The batch is rebuilt at every decode step, not once per batch.</li>
+        <li>Each step, the scheduler keeps running sequences, admits waiting ones only if enough free KV-cache blocks exist, and preempts low-priority sequences when memory runs out.</li>
+        <li>In vLLM this lives in a separate <b>engine core</b> process that owns the scheduler and the KV-cache manager. One or more API-server processes feed it over ZMQ sockets, and it drives one worker process per GPU.</li>
+      </ul>
+    </div>
+    <div class="tool" aria-live="polite">
+      <h4>See the difference</h4>
+      <div class="seg toggle" role="group" aria-label="Batching method">
+        <button type="button" data-b="static" aria-pressed="true">Static batching</button>
+        <button type="button" data-b="cont" aria-pressed="false">Continuous batching</button>
+      </div>
+      <div class="lanes" id="lanes"></div>
+      <div class="keys" style="margin-top:10px">
+        <span style="--k:var(--teal)">Generating</span><span style="--k:var(--blue)">New request</span><span style="--k:var(--idle)">GPU slot wasted</span>
+      </div>
+      <p class="note" id="laneNote" style="margin:8px 0 0"></p>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="kv" style="--c:var(--teal)">
+  <div class="rail"><div class="dot">5</div></div>
+  <div>
+    <h3>The KV cache: the model's notes, and the scarcest thing on the chip</h3>
+    <div class="plain"><p>While reading your conversation, the model writes compact notes about every word so it never has to re-read them. These notes grow with every word, and they must sit in the GPU's fast memory next to the model itself. How many conversations a GPU can handle at once comes down to how many sets of notes fit. Servers store them in small labelled pages, like a well-organised filing cabinet, so no space is wasted.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li>Size per token = 2 (keys and values) × layers × KV heads × head dimension × bytes. For Llama 3.1 70B that's 2 × 80 × 8 × 128 × 2 bytes ≈ <b>320 KB per token</b>.</li>
+        <li>So a single 128K-token request needs about 42 GB of cache, while the 70B model's weights alone are about 140 GB.</li>
+        <li><b>PagedAttention</b> stores the cache in fixed-size pages scattered through memory, the way an operating system pages RAM. Each request has a block table pointing at its pages. This removes most of the waste from reserving maximum-length space up front.</li>
+        <li>Identical prompt prefixes can point to the <i>same</i> pages, which is how prompt caching works.</li>
+        <li>Storing the cache in FP8 instead of 16-bit roughly halves it, which doubles the batch. Cold pages can also be offloaded to CPU RAM or SSD.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="phases" style="--c:var(--teal)">
+  <div class="rail"><div class="dot">6</div></div>
+  <div>
+    <h3>Two very different jobs: reading your message, then writing the reply</h3>
+    <div class="plain"><p><b>Reading</b> (prefill) takes in your whole message at once and keeps the chip's maths units fully busy. It decides how long you wait before the first word. <b>Writing</b> (decode) produces one word at a time, and each word requires sweeping through the entire model in memory. It decides how fast the words stream. Mixing both jobs on the same chip means a big incoming document can briefly stall everyone else's stream.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Prefill</b> is compute-bound: all prompt tokens go through in parallel matrix multiplies. It sets <b>TTFT</b>.</li>
+        <li><b>Decode</b> is memory-bandwidth-bound: each step reads all weights plus the growing KV cache to emit one token per sequence. It sets <b>TPOT</b>. Batching is what makes decode affordable, because one weight read serves the whole batch.</li>
+        <li><b>Interference:</b> a long prefill entering a shared batch delays every decoding sequence.</li>
+        <li><b>Chunked prefill</b> cuts long prompts into slices and interleaves them with decode steps, trading a little prefill efficiency for a bounded stall. The bigger fix is running the two phases on separate machines (stop 9).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="parallel" style="--c:var(--teal)">
+  <div class="rail"><div class="dot">7</div></div>
+  <div>
+    <h3>One model, split across several GPUs that talk constantly</h3>
+    <div class="plain"><p>Large models don't fit on one chip. They're sliced so that every GPU holds a piece of every layer. All the GPUs work on the same batch at the same time and compare notes after each layer over an ultra-fast cable inside the server. Together, that group of GPUs is one "copy" of the model, called a replica.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Tensor parallelism (TP):</b> each weight matrix is split across GPUs, with an all-reduce after every layer. That synchronisation is so frequent it needs NVLink, so TP usually stays within one 8-GPU node.</li>
+        <li><b>Pipeline parallelism (PP):</b> different layers go on different nodes. It's tolerant of slower links, but you have to keep the pipeline full.</li>
+        <li><b>Expert parallelism (EP):</b> in mixture-of-experts models, the experts are spread across many GPUs and tokens are routed to whichever GPU holds their expert. DeepSeek uses this at very large scale.</li>
+        <li><b>Data parallelism (DP):</b> whole replicas are copied. This is how a service scales out.</li>
+      </ul>
+    </div>
+    <figure>
+      <svg viewBox="0 0 680 330" role="img" aria-labelledby="pT"><title id="pT">Inside one replica: an API server feeds an engine core, which sends each batch step to four GPUs, each holding a shard of every layer and syncing over NVLink.</title>
+        <rect x="30" y="16" width="620" height="296" rx="18" fill="none" stroke="var(--rule)" stroke-dasharray="6 5"/>
+        <text x="54" y="44" class="lbl">One replica: one server, 4-way tensor parallel</text>
+        <rect x="70" y="62" width="240" height="56" rx="8" class="bx"/><text x="190" y="84" text-anchor="middle" class="lbl">API server</text><text x="190" y="104" text-anchor="middle" class="sub">HTTP, tokenise, stream out</text>
+        <line x1="310" y1="90" x2="356" y2="90" class="wire" marker-end="url(#ah)"/>
+        <rect x="360" y="62" width="250" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="485" y="84" text-anchor="middle" class="lbl">Engine core</text><text x="485" y="104" text-anchor="middle" class="sub">Scheduler, KV page manager</text>
+        <path d="M485 118 V146 M125 146 H555" class="wire"/>
+        <g class="wire"><path d="M125 146 V172" marker-end="url(#ah)"/><path d="M268 146 V172" marker-end="url(#ah)"/><path d="M411 146 V172" marker-end="url(#ah)"/><path d="M555 146 V172" marker-end="url(#ah)"/></g>
+        <g>
+          <rect x="70" y="176" width="110" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="125" y="198" text-anchor="middle" class="lbl">GPU 0</text><text x="125" y="218" text-anchor="middle" class="sub">Slice 1 of 4</text>
+          <rect x="213" y="176" width="110" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="268" y="198" text-anchor="middle" class="lbl">GPU 1</text><text x="268" y="218" text-anchor="middle" class="sub">Slice 2 of 4</text>
+          <rect x="356" y="176" width="110" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="411" y="198" text-anchor="middle" class="lbl">GPU 2</text><text x="411" y="218" text-anchor="middle" class="sub">Slice 3 of 4</text>
+          <rect x="500" y="176" width="110" height="56" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="555" y="198" text-anchor="middle" class="lbl">GPU 3</text><text x="555" y="218" text-anchor="middle" class="sub">Slice 4 of 4</text>
+        </g>
+        <path d="M125 232 V252 M268 232 V252 M411 232 V252 M555 232 V252" class="wire"/>
+        <rect x="70" y="252" width="540" height="40" rx="6" class="bx"/><text x="340" y="277" text-anchor="middle" class="sub">NVLink: GPUs combine partial results after every layer</text>
+      </svg>
+      <figcaption>Every decode step: the scheduler picks the batch, all GPUs compute their slice, they sync, and one new token comes out per conversation. Then it repeats.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="stop" id="speed" style="--c:var(--teal)">
+  <div class="rail"><div class="dot">8</div></div>
+  <div>
+    <h3>Two speed tricks that don't change the answer much, or at all</h3>
+    <div class="plain"><p><b>Smaller numbers:</b> storing the model's values with fewer digits (quantisation) halves its memory footprint with very little quality loss, so more fits per chip. <b>Guess and check:</b> a small, fast helper model drafts the next few words, and the big model checks all of them in one go. Correct guesses are kept, and the first wrong one is replaced by the big model's own choice, so the final text is exactly what the big model would have written.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Quantisation:</b> FP8 or INT8 weights (about 1 byte per parameter) and INT4 methods such as GPTQ and AWQ (about 0.5 bytes). This frees memory for KV cache and speeds up the memory-bound decode.</li>
+        <li><b>Speculative decoding:</b> a draft model proposes K tokens and the target model verifies all K in one forward pass. A rejection-sampling rule keeps the output distribution identical to the target model's, so it's lossless.</li>
+        <li>Typical speed-ups are 2–3× and depend on the <b>acceptance rate</b>: predictable text such as code or structured output speeds up more than open-ended prose. Variants like EAGLE and Medusa replace the separate draft model with light extra heads on the main model, and vLLM supports several forms.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="line-head" style="--c:var(--amber)"><i></i><h2>Scaling: from one server to a fleet</h2></div>
+
+<section class="stop" id="disagg" style="--c:var(--amber)">
+  <div class="rail"><div class="dot">9</div></div>
+  <div>
+    <h3>Separate teams for reading and writing</h3>
+    <div class="plain"><p>Because reading and writing are such different jobs (stop 6), the largest operators now give each its own pool of machines. One team reads your message and writes up the notes. It hands those notes to a second team, which does the writing. A huge document arriving no longer freezes anyone's stream, and each team can be sized for its own workload.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Prefill–decode disaggregation.</b> The DistServe research system reported serving up to 4.48× more requests, or meeting 10.2× tighter latency targets, versus co-located serving. Microsoft's Splitwise made the same case on production-like traces.</li>
+        <li>The cost is <b>moving the KV cache</b> from prefill to decode GPUs over InfiniBand or RDMA. It's only worth it when that transfer is cheap relative to the interference it removes.</li>
+        <li>It's now standard in frontier stacks: DeepSeek runs separate prefill and decode node groups, NVIDIA Dynamo ships it, and vLLM supports it, including shared KV pools across machines.</li>
+      </ul>
+    </div>
+    <figure>
+      <svg viewBox="0 0 680 400" role="img" aria-labelledby="fT"><title id="fT">Fleet view: the client goes through a gateway and router to a prefill pool, which hands the KV cache to a decode pool that streams tokens back to the client. An autoscaler sizes both pools.</title>
+        <rect x="200" y="16" width="280" height="50" rx="8" class="bx"/><text x="340" y="36" text-anchor="middle" class="lbl">Your app</text><text x="340" y="54" text-anchor="middle" class="sub">Waits on an open stream</text>
+        <line x1="340" y1="66" x2="340" y2="90" class="wire" marker-end="url(#ah)"/>
+        <rect x="200" y="94" width="280" height="50" rx="8" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="340" y="114" text-anchor="middle" class="lbl">Gateway + router</text><text x="340" y="132" text-anchor="middle" class="sub">Auth, limits, prefix + load scoring</text>
+        <path d="M300 144 V166 H180 V190" class="wire" marker-end="url(#ah)"/>
+        <rect x="70" y="194" width="220" height="56" rx="8" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="180" y="216" text-anchor="middle" class="lbl">Prefill pool</text><text x="180" y="236" text-anchor="middle" class="sub">Reads prompt, builds notes</text>
+        <line x1="290" y1="222" x2="386" y2="222" class="wire" marker-end="url(#ah)"/><text x="338" y="212" text-anchor="middle" class="sub">KV cache</text>
+        <rect x="390" y="194" width="220" height="56" rx="8" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="500" y="216" text-anchor="middle" class="lbl">Decode pool</text><text x="500" y="236" text-anchor="middle" class="sub">Writes reply token by token</text>
+        <path d="M610 222 H640 V41 H484" class="wire" marker-end="url(#ah)"/><text x="560" y="32" class="sub">Token stream</text>
+        <path d="M280 330 V290 H180 V254" class="wire" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+        <path d="M400 330 V290 H500 V254" class="wire" stroke-dasharray="4 4" marker-end="url(#ah)"/>
+        <rect x="200" y="330" width="280" height="50" rx="8" class="bx"/><text x="340" y="350" text-anchor="middle" class="lbl">Autoscaler</text><text x="340" y="368" text-anchor="middle" class="sub">Grows or shrinks each pool</text>
+      </svg>
+      <figcaption>Each amber box is really many replicas. The router chooses one prefill replica and one decode replica for each request.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="stop" id="autoscale" style="--c:var(--amber)">
+  <div class="rail"><div class="dot">10</div></div>
+  <div>
+    <h3>Add machines when the queue grows, lend them out at night</h3>
+    <div class="plain"><p>Demand swings through the day. The system watches how many requests are waiting, not just how busy the chips look, and adds or removes model copies to match. Starting a new copy is slow because hundreds of gigabytes of model have to be loaded first, so operators scale ahead of demand and keep spare copies warm.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li>GPU utilisation is a poor scaling signal, because a memory-bound decode can look "busy" at any load. Better signals are queue depth, KV-cache usage and SLO attainment (TTFT and TPOT percentiles). llm-d's central queue exposes a "true demand" metric for exactly this purpose.</li>
+        <li>Cold start covers provisioning the node, pulling the container, and loading weights into GPU memory. That's minutes for large models, so the levers are predictive scaling, warm pools, fast weight streaming and, for small models, scale-to-zero.</li>
+        <li>Prefill and decode pools scale independently once disaggregated.</li>
+        <li>Off-peak capacity gets reused: DeepSeek shifts inference nodes to research and training during low-load night hours.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="stop" id="sizing" style="--c:var(--amber)">
+  <div class="rail"><div class="dot">11</div></div>
+  <div>
+    <h3>How many GPUs does one model need?</h3>
+    <div class="plain"><p>There are three different answers. The <b>minimum to load</b> one copy depends only on the model's size. A <b>production copy</b> needs extra room for many conversations' notes. The <b>whole service</b> is that copy multiplied by however many copies the traffic needs. Try the calculator: it shows memory per copy, not total fleet size.</p></div>
+    <div class="tool">
+      <h4>GPU sizing calculator</h4>
+      <div class="grid2">
+        <label class="f">Model<select id="cModel">
+          <option value="8">Llama 3.1 8B</option>
+          <option value="70" selected>Llama 3.1 70B</option>
+          <option value="405">Llama 3.1 405B</option>
+        </select></label>
+        <label class="f">Weight precision<select id="cPrec">
+          <option value="2" selected>16-bit (BF16/FP16)</option>
+          <option value="1">8-bit (FP8)</option>
+          <option value="0.5">4-bit (INT4)</option>
+        </select></label>
+        <label class="f">KV cache precision<select id="cKv">
+          <option value="2" selected>16-bit</option>
+          <option value="1">8-bit (FP8)</option>
+        </select></label>
+        <label class="f">GPU<select id="cGpu">
+          <option value="80" selected>H100 / H800 (80 GB)</option>
+          <option value="141">H200 (141 GB)</option>
+          <option value="192">B200 (192 GB)</option>
+        </select></label>
+        <label class="f">Average context per conversation (tokens)<input id="cCtx" type="number" min="512" step="512" value="8192"></label>
+        <label class="f">Conversations in flight at once<input id="cUsers" type="number" min="1" step="1" value="32"></label>
+      </div>
+      <div class="out" aria-live="polite">
+        <div><b id="cGpus">–</b> GPUs per copy <span class="note" id="cDetail"></span></div>
+        <div class="bar" id="cBar"><i id="bW" style="background:var(--amber)"></i><i id="bK" style="background:var(--teal)"></i><i id="bO" style="background:var(--muted)"></i></div>
+        <div class="keys"><span style="--k:var(--amber)" id="kW">Weights</span><span style="--k:var(--teal)" id="kK">KV cache</span><span style="--k:var(--muted)" id="kO">Runtime overhead</span><span style="--k:var(--idle)">Free headroom</span></div>
+      </div>
+      <p class="note" style="margin:12px 0 0">Assumes 10% runtime overhead, 90% usable GPU memory, and GPU counts rounded up to 1, 2, 4, 8 or 16 to suit tensor parallelism. Real deployments add margin for traffic spikes.</p>
+    </div>
+    <div class="tech"><h4>Under the hood: a real production example</h4>
+      <p>DeepSeek published its V3/R1 serving setup, the most detailed public picture of a frontier-scale service. Its 671B-parameter mixture-of-experts model activates only 37B parameters per token, and it runs on H800 GPUs (8 per server node).</p>
+      <div class="stat">
+        <div><b>32 GPUs</b><span>one prefill unit (4 nodes)</span></div>
+        <div><b>144 GPUs</b><span>one decode unit (18 nodes)</span></div>
+        <div><b>~2,224 GPUs</b><span>peak, 278 nodes (Feb 2025)</span></div>
+        <div><b>~1,814 GPUs</b><span>daily average, 226.75 nodes</span></div>
+      </div>
+      <p>That's one figure, from a single day in February 2025. Later reports (not confirmed by DeepSeek) say V4 inference moved to Huawei Ascend chips, with a planned build-out of at least 160,000 accelerators for inference.</p>
+    </div>
+  </div>
+</section>
+
+<div class="line-head" style="--c:var(--magenta)"><i></i><h2>Sharing and cost: many customers, one set of chips</h2></div>
+
+<section class="stop" id="tenancy" style="--c:var(--magenta)">
+  <div class="rail"><div class="dot">12</div></div>
+  <div>
+    <h3>Thousands of strangers share the same GPU safely</h3>
+    <div class="plain"><p>Your conversation runs on the same chip, in the same batch, through the same copy of the model as many other people's. That's safe because the model itself is read-only, and each conversation's notes sit in their own labelled pages that only that conversation can read. The pages are freed when you're done. The one subtle risk is timing: if notes were shared between customers, someone could notice that certain text is processed suspiciously fast and guess it was recently seen. Providers prevent this by keeping each customer's reusable notes separate.</p></div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Isolation is logical, not physical.</b> Weights are shared and read-only. Each sequence has its own block table, and attention kernels only read that sequence's pages.</li>
+        <li><b>Contention</b> is handled with gateway quotas, priority tiers, fair queuing at the router, and preemption order in the scheduler.</li>
+        <li><b>Prefix-cache side channel.</b> Cache hits are measurably faster than misses, so shared caches across trust boundaries can leak prompt contents. The mitigation is a per-tenant <code>cache_salt</code> (supported in vLLM, and in NVIDIA Dynamo's routing), so reuse happens only within one tenant. Research systems such as CacheSolidarity isolate selectively to keep more reuse. A salt is an isolation key, not authentication: the gateway must set it from a verified identity.</li>
+        <li><b>Per-customer fine-tunes</b> are served as LoRA adapters on one shared base model. Each request in a batch applies its own adapter (S-LoRA and Punica techniques).</li>
+        <li><b>Hardware partitioning</b> (MIG slices, MPS, dedicated replicas, confidential-computing GPUs) is reserved for small models, dedicated enterprise capacity or regulated workloads.</li>
+      </ul>
+    </div>
+    <figure>
+      <svg viewBox="0 0 680 300" role="img" aria-labelledby="tT"><title id="tT">GPU memory holds one shared copy of the model and a pool of note pages, each owned by tenant A, tenant B, or free.</title>
+        <rect x="30" y="14" width="620" height="240" rx="18" fill="none" stroke="var(--rule)" stroke-dasharray="6 5"/>
+        <text x="54" y="42" class="lbl">One GPU's memory</text>
+        <rect x="60" y="56" width="560" height="48" rx="8" class="bx"/><text x="340" y="76" text-anchor="middle" class="lbl">Model weights</text><text x="340" y="94" text-anchor="middle" class="sub">One copy, shared by everyone, read-only</text>
+        <text x="60" y="134" class="sub">Note pages (KV cache), each owned by one conversation</text>
+        <g id="kvgrid"></g>
+        <rect x="190" y="272" width="12" height="12" rx="2" fill="var(--magenta-soft)" stroke="var(--magenta)"/><text x="208" y="282" class="sub">Customer A</text>
+        <rect x="300" y="272" width="12" height="12" rx="2" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="318" y="282" class="sub">Customer B</text>
+        <rect x="410" y="272" width="12" height="12" rx="2" fill="var(--idle)" stroke="var(--rule)"/><text x="428" y="282" class="sub">Free</text>
+      </svg>
+      <figcaption>Pages from different customers sit side by side in memory, but each conversation's page table only points at its own.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="stop" id="cost" style="--c:var(--magenta)">
+  <div class="rail"><div class="dot">13</div></div>
+  <div>
+    <h3>Why you pay per token, and how providers make tokens cheaper</h3>
+    <div class="plain"><p>GPUs are rented by the hour whether they're busy or not. Your bill is per word because the provider's real cost is the price of an hour of GPU divided by how many words that hour produced. Every trick on this page (batching, caching, routing, splitting pools, quantising) exists to squeeze more words out of each GPU-hour. That's why re-sent conversation history is often billed cheaply as a "cache hit": the provider genuinely didn't have to recompute it.</p></div>
+    <div class="tool">
+      <h4>Cost per million tokens</h4>
+      <div class="grid2">
+        <label class="f">GPU rental price ($ per GPU-hour)<input id="pRate" type="number" min="0.1" step="0.1" value="2"></label>
+        <label class="f">Output speed per GPU (tokens per second, whole batch)<input id="pTps" type="number" min="1" step="50" value="1500"></label>
+        <label class="f">Average utilisation over the day (%)<input id="pUtil" type="number" min="1" max="100" step="5" value="60"></label>
+      </div>
+      <div class="out" aria-live="polite"><b id="pOut">–</b> per million output tokens <span class="note" id="pNote"></span></div>
+      <p class="note" style="margin:10px 0 0">Raw compute cost only. It excludes prefill work, networking, staff, idle reserve and margin.</p>
+    </div>
+    <div class="tech"><h4>Under the hood</h4>
+      <ul>
+        <li><b>Formula:</b> cost per 1M tokens = hourly GPU price ÷ (tokens/sec × 3,600 × utilisation) × 1,000,000.</li>
+        <li><b>The levers:</b> batch size (limited by KV memory), cache hit rate, quantisation, speculative decoding, disaggregation, and keeping utilisation high across the day.</li>
+        <li><b>Real numbers:</b> at an assumed $2 per H800-hour, DeepSeek put its daily inference cost at about $87,072. It reported up to 9,213 prefill tokens per second per GPU, helped by a 56.3% cache hit rate.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <h2>Glossary</h2>
+  <dl class="gloss">
+    <dt>Token</dt><dd>A chunk of text, roughly three-quarters of an English word. Models read and write in tokens.</dd>
+    <dt>Prefill</dt><dd>Reading the whole prompt in one pass. Sets the wait before the first word.</dd>
+    <dt>Decode</dt><dd>Writing the reply one token at a time. Sets streaming speed.</dd>
+    <dt>KV cache</dt><dd>The model's stored notes about tokens already read, kept in GPU memory.</dd>
+    <dt>TTFT / TPOT</dt><dd>Time to first token / time per output token: the two latency numbers that matter.</dd>
+    <dt>Replica</dt><dd>One complete running copy of the model, often spread over several GPUs.</dd>
+    <dt>Node</dt><dd>One physical server, typically holding 8 GPUs.</dd>
+    <dt>NVLink / InfiniBand</dt><dd>Fast links between GPUs inside a server / between servers.</dd>
+    <dt>Mixture of experts (MoE)</dt><dd>A model where each token uses only a few of many sub-networks ("experts").</dd>
+    <dt>LoRA</dt><dd>A small add-on that customises a shared base model without copying it.</dd>
+  </dl>
+
+  <h2>Sources</h2>
+  <ol>
+    <li><a href="https://docs.vllm.ai/en/latest/design/arch_overview/">vLLM architecture overview</a></li>
+    <li><a href="https://www.techinterview.org/post/3233476388/designing-an-llm-serving-system/">Designing an LLM serving system that hits its latency budget</a></li>
+    <li><a href="https://system-design.space/en/chapter/llm-inference-optimization">LLM inference optimization (System Design Space)</a></li>
+    <li><a href="https://introl.com/blog/vllm-production-deployment-inference-serving-architecture-guide">vLLM production deployment guide (Introl)</a></li>
+    <li><a href="https://hao-ai-lab.github.io/blogs/distserve">DistServe blog (Hao AI Lab)</a> and <a href="https://huggingface.co/papers/2401.09670">paper</a></li>
+    <li><a href="https://howaiworks.ai/glossary/disaggregated-serving">Disaggregated serving explained</a></li>
+    <li><a href="https://llm-d.ai/docs/architecture/advanced/kv-management/prefix-cache-aware-routing">llm-d: prefix-cache aware routing</a> and <a href="https://llm-d.ai/docs/architecture/advanced/kv-management/kv-indexer">KV-cache indexer</a></li>
+    <li><a href="https://llm-d.ai/blog/kvcache-wins-you-can-see">llm-d blog: KV-cache wins you can see</a></li>
+    <li><a href="https://llm-d.ai/blog/production-grade-llm-inference-at-scale-kserve-llm-d-vllm">Production-grade inference with KServe, llm-d and vLLM</a></li>
+    <li><a href="https://llm-d.ai/docs/getting-started">llm-d getting started (autoscaling, flow control)</a></li>
+    <li><a href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek V3/R1 inference system overview</a></li>
+    <li><a href="https://arxiv.org/pdf/2506.12708">Serving LLMs on Huawei CloudMatrix384 (DeepSeek deployment analysis)</a></li>
+    <li><a href="https://xenospectrum.com/en/deepseek-huawei-ascend-950dt-160k-order/">Report on DeepSeek's planned Ascend 950DT inference deployment</a></li>
+    <li><a href="https://packet.ai/blog/vllm-prefix-caching">vLLM prefix caching and cache_salt</a></li>
+    <li><a href="https://docs.nvidia.com/dynamo/v1.3.0/additional-resources/nvidia-request-extensions-nvext.md">NVIDIA Dynamo: cache salt and tenant isolation</a></li>
+    <li><a href="https://papers.cool/arxiv/2603.10726">CacheSolidarity: prefix caching side channels</a></li>
+    <li><a href="https://memx.app/blog/speculative-decoding-explained/">Speculative decoding explained</a></li>
+  </ol>
+  <p class="note">The big AI labs don't publish their internal serving designs. This page describes the industry-standard architecture as documented by open-source engines, research papers and operators who do publish. Research current as of October 2026.</p>
+</div></footer>
+
+<script>
+(function(){
+  /* journey map stations */
+  var S=[["client","Your app","--blue"],["gateway","Gateway","--blue"],["router","Router","--blue"],["scheduler","Batching","--teal"],["kv","KV cache","--teal"],["phases","Read & write","--teal"],["parallel","Split model","--teal"],["speed","Speed tricks","--teal"],["disagg","Split pools","--amber"],["autoscale","Autoscaling","--amber"],["sizing","GPU sizing","--amber"],["tenancy","Sharing safely","--magenta"],["cost","Cost","--magenta"]];
+  var g=document.getElementById("stations"),ns="http://www.w3.org/2000/svg",x0=40,step=(960-40)/(S.length-1);
+  S.forEach(function(s,i){
+    var x=x0+i*step,a=document.createElementNS(ns,"a");a.setAttribute("href","#"+s[0]);
+    var c=document.createElementNS(ns,"circle");c.setAttribute("class","st");c.setAttribute("cx",x);c.setAttribute("cy",95);c.setAttribute("r",11);
+    c.setAttribute("fill","var(--surface)");c.setAttribute("stroke","var("+s[2]+")");c.setAttribute("stroke-width",4);
+    var t=document.createElementNS(ns,"text");t.setAttribute("x",x);t.setAttribute("y",i%2?140:58);t.setAttribute("text-anchor","middle");t.textContent=s[1];
+    var n=document.createElementNS(ns,"text");n.setAttribute("x",x);n.setAttribute("y",i%2?158:40);n.setAttribute("text-anchor","middle");n.setAttribute("style","font-weight:400;fill:var(--muted)");n.textContent=(i+1);
+    var tl=document.createElementNS(ns,"title");tl.textContent="Stop "+(i+1)+": "+s[1];
+    a.appendChild(tl);a.appendChild(c);a.appendChild(t);a.appendChild(n);g.appendChild(a);
+  });
+
+  /* reading mode */
+  var mb=document.querySelectorAll(".modebar button");
+  mb.forEach(function(b){b.addEventListener("click",function(){
+    document.body.setAttribute("data-mode",b.dataset.m);
+    mb.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false")});
+    try{localStorage.setItem("llm-mode",b.dataset.m)}catch(e){}
+  })});
+  try{var sm=localStorage.getItem("llm-mode");if(sm){var bb=document.querySelector('.modebar button[data-m="'+sm+'"]');if(bb)bb.click();}}catch(e){}
+
+  /* batching lanes: 0 idle,1 gen,2 new */
+  var lanes={
+    static:[[1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1],[1,1,1,1,0,0,0,0,0,0,0,0,2,1,1,1],[1,1,1,1,1,1,1,0,0,0,0,0,2,1,1,0],[1,1,0,0,0,0,0,0,0,0,0,0,2,1,1,1]],
+    cont:[[1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1],[1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1],[1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1],[1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1]]
+  };
+  var notes={static:"Static: finished slots sit empty until the slowest request in the batch is done. Over a third of GPU time here is wasted.",cont:"Continuous: a waiting request takes over the moment a slot frees up. Almost no GPU time is wasted."};
+  var col=["var(--idle)","var(--teal)","var(--blue)"];
+  function draw(m){
+    var L=document.getElementById("lanes");L.innerHTML="";
+    lanes[m].forEach(function(r,i){var d=document.createElement("div");d.className="lane";
+      var h=document.createElement("span");h.textContent="Slot "+(i+1);d.appendChild(h);
+      r.forEach(function(v){var c=document.createElement("i");c.style.background=col[v];d.appendChild(c)});L.appendChild(d)});
+    document.getElementById("laneNote").textContent=notes[m];
+  }
+  var bt=document.querySelectorAll("[data-b]");
+  bt.forEach(function(b){b.addEventListener("click",function(){bt.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false")});draw(b.dataset.b)})});
+  draw("static");
+
+  /* tenancy kv grid */
+  var kg=document.getElementById("kvgrid"),pat="ABFABAFBAFFBABAFBFAABFBAFABFFBAB";
+  for(var i=0;i<32;i++){var r=document.createElementNS(ns,"rect"),col2=i%16,row=Math.floor(i/16);
+    r.setAttribute("x",60+col2*35);r.setAttribute("y",146+row*46);r.setAttribute("width",29);r.setAttribute("height",38);r.setAttribute("rx",4);
+    var k=pat[i];r.setAttribute("fill",k==="A"?"var(--magenta-soft)":k==="B"?"var(--blue-soft)":"var(--idle)");
+    r.setAttribute("stroke",k==="A"?"var(--magenta)":k==="B"?"var(--blue)":"var(--rule)");kg.appendChild(r);}
+
+  /* gpu sizing */
+  var ARCH={"8":{p:8,L:32,H:8,D:128},"70":{p:70.6,L:80,H:8,D:128},"405":{p:405,L:126,H:8,D:128}};
+  function v(id){return document.getElementById(id)}
+  function calc(){
+    var a=ARCH[v("cModel").value],pb=+v("cPrec").value,kb=+v("cKv").value,mem=+v("cGpu").value,
+        ctx=Math.max(512,+v("cCtx").value||0),u=Math.max(1,+v("cUsers").value||0);
+    var w=a.p*pb, kvTok=2*a.L*a.H*a.D*kb, kv=kvTok*ctx*u/1e9, ov=(w+kv)*0.10, need=w+kv+ov;
+    var raw=Math.ceil(need/(mem*0.9)),n=1;while(n<raw)n*=2;
+    var tot=n*mem;
+    v("cGpus").textContent=n;
+    v("cDetail").textContent="("+need.toFixed(0)+" GB needed of "+tot+" GB total; notes cost "+(kvTok/1024).toFixed(0)+" KB per token)";
+    v("bW").style.width=(w/tot*100)+"%";v("bK").style.width=(kv/tot*100)+"%";v("bO").style.width=(ov/tot*100)+"%";
+    v("kW").textContent="Weights "+w.toFixed(0)+" GB";v("kK").textContent="KV cache "+kv.toFixed(0)+" GB";v("kO").textContent="Overhead "+ov.toFixed(0)+" GB";
+  }
+  ["cModel","cPrec","cKv","cGpu","cCtx","cUsers"].forEach(function(id){v(id).addEventListener("input",calc)});calc();
+
+  /* cost */
+  function cost(){
+    var r=+v("pRate").value||0,t=+v("pTps").value||0,u=Math.min(100,Math.max(1,+v("pUtil").value||0))/100;
+    if(!r||!t){v("pOut").textContent="–";v("pNote").textContent="Enter a price and a speed above zero.";return}
+    var perM=r/(t*3600*u)*1e6;
+    v("pOut").textContent="$"+(perM<1?perM.toFixed(3):perM.toFixed(2));
+    v("pNote").textContent="("+Math.round(t*3600*u).toLocaleString()+" tokens per GPU-hour)";
+  }
+  ["pRate","pTps","pUtil"].forEach(function(id){v(id).addEventListener("input",cost)});cost();
+})();
+</script>
+</body>
+</html>

@@ -64,6 +64,7 @@
     <a class="nav-extra" href="#knowledge">🧱 Knowledge systems depth</a>
     <a class="nav-extra" href="#adv-eng">🧭 Advanced: Engineering</a>
     <a class="nav-extra" href="#adv-dl">🧮 Advanced: Deep learning and math</a>
+    <a class="nav-extra" href="#sysdesign">🏗 Advanced: System design</a>
   </nav>
 </aside>
 
@@ -636,6 +637,23 @@
     <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/" target="_blank">NVIDIA CUDA C++ Programming Guide</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">Threads, blocks, memory hierarchy. The base for reading any kernel.</div></div></div>
     <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://triton-lang.org/main/index.html" target="_blank">Triton Language Documentation</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">Python DSL for writing GPU kernels without raw CUDA.</div></div></div>
     <div class="resource-card" data-type="repo"><div class="resource-icon">🗄</div><div class="resource-body"><div class="resource-title"><a href="https://github.com/gpu-mode/lectures" target="_blank">GPU MODE Lectures</a><span class="tag tag-repo">Repo</span></div><div class="resource-note">Community lecture series on CUDA, Triton and kernel optimization.</div></div></div>
+  </div>
+</div>
+
+<!-- sysdesign -->
+<div id="sysdesign" class="extra-section" style="margin-top:1.5rem">
+  <div class="extra-header">
+    <h2>🏗 Advanced · System design in the LLM era</h2>
+    <p>How an LLM answers you in production: gateway, prefix-aware routing, continuous batching, KV cache, disaggregated prefill and decode, autoscaling, multi-tenancy and cost.</p>
+  </div>
+  <div class="extra-grid">
+    <div class="resource-card" data-type="tool"><div class="resource-icon">🏗</div><div class="resource-body"><div class="resource-title"><a href="system-design.html" target="_blank">Interactive guide: the LLM serving stack, stop by stop</a><span class="tag tag-tool">Guide</span></div><div class="resource-note">13 stops from your app to the GPU and back, each in plain English and technical form, with a GPU sizing calculator and a cost-per-token calculator. Hosted in this repo.</div></div></div>
+    <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://docs.vllm.ai/en/latest/design/arch_overview/" target="_blank">vLLM architecture overview</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">API server, engine core, scheduler and workers. The reference layout for an open-source serving engine.</div></div></div>
+    <div class="resource-card" data-type="blog"><div class="resource-icon">📝</div><div class="resource-body"><div class="resource-title"><a href="https://hao-ai-lab.github.io/blogs/distserve" target="_blank">DistServe: disaggregating prefill and decode</a><span class="tag tag-blog">Blog</span></div><div class="resource-note">Why separate prefill and decode pools, and how much throughput and latency it buys.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://huggingface.co/papers/2401.09670" target="_blank">DistServe paper</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">The research paper behind prefill-decode disaggregation.</div></div></div>
+    <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://llm-d.ai/docs/architecture/advanced/kv-management/prefix-cache-aware-routing" target="_blank">llm-d: prefix-cache aware routing</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">Route requests to the replica that already holds their KV blocks, balanced against load.</div></div></div>
+    <div class="resource-card" data-type="report"><div class="resource-icon">📊</div><div class="resource-body"><div class="resource-title"><a href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md" target="_blank">DeepSeek V3/R1 inference system overview</a><span class="tag tag-report">Report</span></div><div class="resource-note">The most detailed public look at a frontier-scale service: GPU counts, cache hit rate and daily cost.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/pdf/2506.12708" target="_blank">Serving LLMs on Huawei CloudMatrix384</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Analysis of a large-scale DeepSeek deployment on a non-NVIDIA stack.</div></div></div>
   </div>
 </div>
 

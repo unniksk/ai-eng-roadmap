@@ -8,6 +8,7 @@ No build step and no dependencies. Progress is saved in your browser's `localSto
 
 ```
 index.html            sidebar, Guide view and Tracker view (switch top right)
+system-design.html    standalone interactive guide: the LLM serving stack
 assets/css/style.css  guide + tracker styles (dark mode via prefers-color-scheme)
 assets/js/data.js     all sections and items (edit this to update content)
 assets/js/guide.js    guide search/filter, Guide/Tracker switch
