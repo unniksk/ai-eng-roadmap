@@ -159,3 +159,6 @@ a:hover{text-decoration:underline}
 #tracker .btn:hover,#tracker .btn:focus-visible{color:var(--card)}
 .filter-btn:hover,.filter-btn.active{color:var(--card)}
 .toast{background:var(--sidebar);color:var(--sidebar-text)}
+#tracker .rh{margin:.9rem .5rem .3rem;padding-top:.7rem;border-top:1px solid var(--border);font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+#tracker .rd{padding:.35rem .5rem;font-size:.83rem}
+#tracker .rd a{color:var(--primary);font-weight:600;text-decoration:none}#tracker .rd a:hover{text-decoration:underline}

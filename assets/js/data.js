@@ -212,4 +212,24 @@ window.TRACKER_SECTIONS=[
 ['p-8','FlashAttention (2022)','Optimization behind long context.'],
 ['p-9','Judging LLM-as-a-Judge with MT-Bench (2023)','Read before Ch 8.'],
 ['p-10','DSPy (2023)','Prompt optimization.']]}
+,
+{id:'knowledge',c:'cl',icon:'🧱',isNew:1,part:'Part 8 · Intermediate and Advanced depth',t:'Intermediate · Knowledge systems depth',d:'Ingestion, metadata and permissions, ANN search internals, and serving retrieval behind an API.',items:[
+['k-1','Document ingestion and parsing','PDF, table and layout extraction before chunking.'],
+['k-2','Metadata filtering and permissions-aware retrieval','Filter by tenant, role and date at query time, not after.'],
+['k-3','Vector search internals (ANN, HNSW)','Recall vs latency vs memory; when brute force is fine.'],
+['k-4','Serving RAG with FastAPI','Async endpoints, streaming responses, request validation.']]},
+{id:'adv-eng',c:'cp',icon:'🧭',isNew:1,t:'Advanced · Engineering track',d:'Reachable by building well: agent patterns, memory, GraphRAG, red teaming, routing, serving, caching.',items:[
+['a-1','ReAct and planning patterns','Reason-act-observe, plan-then-execute, reflection.'],
+['a-2','State, memory and context compaction','What to keep, summarize or drop as a run grows.'],
+['a-3','GraphRAG','When entity graphs beat flat chunk retrieval.'],
+['a-4','Adversarial testing and red teaming','Build an attack suite and run it in CI.'],
+['m-3','Model routing and fallbacks','Cost and quality routing, provider failover.'],
+['m-4','Inference serving with vLLM','Continuous batching, PagedAttention, throughput vs latency.'],
+['m-6','Semantic and KV caching','Prompt prefix caching, KV cache, semantic response cache.']]},
+{id:'adv-dl',c:'cg',icon:'🧮',isNew:1,t:'Advanced · Deep learning and math track',d:'Needs linear algebra, optimization and training know-how: fine-tuning, alignment, quantization, MoE, kernels.',items:[
+['m-1','Fine-tuning with LoRA and QLoRA','When to fine-tune vs prompt or RAG; adapter rank and cost.'],
+['m-2','Preference tuning: DPO and RLHF','What each optimizes and what data it needs.'],
+['m-5','Quantization','GPTQ, AWQ, int8 vs 4-bit; quality and speed tradeoffs.'],
+['m-7','Mixture of Experts (MoE)','Sparse activation, router, why serving is harder.'],
+['m-8','CUDA and kernel optimization','Memory-bound vs compute-bound; Triton, FlashAttention.']]}
 ];

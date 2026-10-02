@@ -23,6 +23,7 @@ python3 -m http.server 8000   # or just: open index.html
 ## Gotchas
 
 - **Never rename or reuse an existing item `id`** in `data.js`: saved progress in users' browsers is keyed on it.
+- A tracker section's "To read" list is pulled from the Guide element with the same `id` (e.g. `ch1`, `courses`, `adv-eng`). Give a new section a matching `id` in `index.html` to get one.
 - Bump the `KEY` in `app.js` only if you intend to discard everyone's saved progress.
 - Section headers (`part`) render only when they differ from the previous section's `part`, so keep sections of the same part adjacent.
 - Item text is passed through `esc()` (escapes `&` and `<` only), but the optional link (4th element) is inserted unescaped into an `href`.
