@@ -291,5 +291,21 @@ window.TRACKER_SECTIONS=[
 ['pv-3','Publish an experiment','A reproducible repo or notebook with an eval, not just a demo.'],
 ['pv-4','Give a talk or write a post','Internal first, then public.'],
 ['pv-5','Contribute to open source','An eval, a bug fix or docs for a project you depend on.'],
-['pv-6','Run design reviews','Use the Senior lens questions on other teams\' designs.']]}
+['pv-6','Run design reviews','Use the Senior lens questions on other teams\' designs.']]},
+{id:'ctx-eng',c:'ck',isNew:1,t:'Context engineering for agents',d:'Deciding what is in the context window at every step of a long agent run: write, select, compress and isolate.',items:[
+['ce-1','The context budget','What fills the window: system prompt, tool definitions, history, retrieved documents and tool results. Measure each part.'],
+['ce-2','Write context outside the window','Scratchpads, notes files and to-do lists the agent writes and re-reads instead of holding everything in context.'],
+['ce-3','Select context just in time','Load files, documents and tools when a step needs them rather than stuffing everything in up front.'],
+['ce-4','Compress context','Summarise old turns, trim long tool output, and compact the history at a set threshold.'],
+['ce-5','Isolate context with sub-agents','Each sub-agent starts with a clean, focused context and returns a short result to the main agent.'],
+['ce-6','Context rot and position','Recall drops as the window fills; pin critical rules and re-state them at boundaries.'],
+['ce-7','Structure context for caching','Keep the stable prefix first and the changing parts last so prompt caching keeps hitting.']]},
+{id:'harness',c:'ck',isNew:1,t:'Harness engineering',d:'Agent = model + harness. The control loop, tools, permissions, state and observability that turn a model into a dependable agent.',items:[
+['he-1','Agent = model + harness','What the harness owns: the control loop, tool registry, context management, state, permissions and tracing.'],
+['he-2','The agent loop and stop conditions','Step budgets, time and cost caps, loop detection, and when to hand back to a person.'],
+['he-3','Tool registry and execution','Typed schemas, clear error messages returned to the model, timeouts and retries.'],
+['he-4','Permissions and sandboxing','Allow-lists, approval prompts for irreversible actions, and isolated execution environments.'],
+['he-5','Hooks and instruction files','Pre- and post-tool hooks, and project instruction files such as CLAUDE.md or AGENTS.md.'],
+['he-6','State, checkpoints and resumption','Persist progress, resume after a crash, and hand work over between sessions.'],
+['he-7','Evaluating the harness','Hold the model fixed, compare harness versions on the same task set, and trace every step.']]}
 ];
