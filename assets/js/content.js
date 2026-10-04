@@ -80,6 +80,7 @@ const LEGACY={tracker:'progress',map:'flows',guide:'flows'};
 
 // Change log, newest first: [ISO date, title, detail]
 const NEWS=[
+['2026-10-04','Visual summaries','Infographics on LLM evaluation methods, RAG in production and the silent failure modes of agents, shown on the topics they cover and collected on the Visuals page.'],
 ['2026-10-04','Skill graph in colour, full width','Each level has its own colour, the graph stretches across the screen, and selecting a topic highlights what it builds on and leads to.'],
 ['2026-10-04','Redesign: flows, topics and the skill graph','Eight learning flows, a page per topic with a Senior lens, a skill graph on larger screens, a link on every page and heading, and Lucide icons in place of emoji.'],
 ['2026-10-04','Shaping the field','Five new topics: frontier models, agent economics, AI platform strategy, governance and your own point of view.'],
@@ -92,3 +93,10 @@ const EXTRA_DESC={opensource:'Free, hands-on alternatives covering the same mate
 
 // Companion pages linked from a topic: [href, title, note]
 const TOPIC_LINKS={sysdesign:['system-design.html','The LLM serving stack, stop by stop','Interactive guide: 13 stops from your app to the GPU and back, with GPU sizing and cost calculators.']};
+
+// Infographics shown on topic pages and on the Visuals page (#visuals). Files live in assets/img/.
+// [slug, file, title, credit, summary, topic ids]
+const FIGURES=[
+['llm-evaluation-methods','llm-evaluation-methods.jpg','11 LLM evaluation methods','Alok Sharan','G-Eval, ROUGE, BLEU, LLM-as-judge, BERTScore, human evaluation, multi-turn evaluation, safety evaluation, LLM juries, DAG evaluation and agent trajectory accuracy, each drawn as a short pipeline with what it measures.',['ch6','ch7','ch8','ch9']],
+['rag-in-production','rag-in-production.jpg','Design, evaluate, debug and operate RAG in production','@gen_ai_learning','Offline ingestion and online query pipelines, retrieval strategies, retrieval, generation and system metrics with worked recall, precision and MRR examples, a ten-step debugging checklist, what to log, a monitoring dashboard, offline versus online evaluation and common interview questions.',['ch13','knowledge','capstone','graphrag']],
+['agent-silent-killers','agent-silent-killers.jpg','9 silent killers of AI agents in production','Prem Natarajan','Tool definition bloat, context window decay, retrieval poisoning, runaway loops, silent schema drift, eval blindness, hidden non-determinism, cost blind spots and no failure mode, each with its fix.',['ch10','ch12','ch14','ch16','ch18','adv-eng']]];

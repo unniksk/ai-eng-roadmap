@@ -15,10 +15,10 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ## Architecture
 
 - `index.html` is a shell: top bar, sidebar and an empty `<main>`. Everything is rendered by `assets/js/app.js` from the hash route.
-- Routes (all shareable): `#flows`, `#graph[/topic-slug]`, `#flow/<slug>`, `#flow/<slug>/<step>` (a topic page in flow context), `#topics`, `#topic/<slug>`, `#progress`, `#new`. Any route can take one more segment that scrolls to a heading or checklist item, e.g. `#topic/graphrag/reading-list` or `#topic/graphrag/gr-3`. An empty hash shows the graph on screens 1024px and wider, flows otherwise (the List/Graph switch remembers a choice). Old links redirect: `#tracker`, `#map`, `#guide` via `LEGACY`, and bare section ids like `#ch13`.
+- Routes (all shareable): `#flows`, `#graph[/topic-slug]`, `#flow/<slug>`, `#flow/<slug>/<step>` (a topic page in flow context), `#topics`, `#topic/<slug>`, `#progress`, `#visuals`, `#new`. Any route can take one more segment that scrolls to a heading or checklist item, e.g. `#topic/graphrag/reading-list` or `#topic/graphrag/gr-3`. An empty hash shows the graph on screens 1024px and wider, flows otherwise (the List/Graph switch remembers a choice). Old links redirect: `#tracker`, `#map`, `#guide` via `LEGACY`, and bare section ids like `#ch13`.
 - `assets/js/data.js` sets `window.TRACKER_SECTIONS` (`{id, c, part?, isNew?, icon?, t, d, items}`); each item is `[id, label, note, optionalLink]`. Checklist content lives here.
 - `assets/js/resources.js` sets `window.RESOURCES`: the reading list per section id, `[type, title, url, note]`. Types: paper, docs, course, tool, repo, blog, video, report.
-- `assets/js/content.js` holds page structure: `LEVELS`, `TOPIC_META` (slug, short title, level, hours, prerequisites, Senior lens), `GROUPS` (topic index and sidebar order), `FLOWS`, `LEGACY`, `NEWS` (the What's new page), `EXTRA_DESC` and `TOPIC_LINKS` (companion pages such as `system-design.html`).
+- `assets/js/content.js` holds page structure: `LEVELS`, `TOPIC_META` (slug, short title, level, hours, prerequisites, Senior lens), `GROUPS` (topic index and sidebar order), `FLOWS`, `LEGACY`, `NEWS` (the What's new page), `EXTRA_DESC`, `TOPIC_LINKS` (companion pages such as `system-design.html`) and `FIGURES` (infographics in `assets/img/`, shown as a Visual summary on each listed topic and on `#visuals`).
 - `assets/js/icons.js` has the Lucide icons the site uses (ISC licence); `icon(name)` returns inline SVG. Copy any new icon's inner SVG from lucide-static.
 - `assets/js/app.js` is the router, page renderers, skill graph layout, search (`/` to focus), progress updates and export/import/reset. Events are delegated from `document`; there are no inline handlers.
 - `assets/css/style.css`: neutral palette with one accent, light and dark (system setting plus a toggle stored in `ai_roadmap_theme`). Fonts are Geist, Source Serif 4 and Geist Mono from Google Fonts, with system fallbacks.
@@ -29,6 +29,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 
 - New topic: add a section to `data.js`, a `TOPIC_META` row and a `GROUPS` entry in `content.js`, and optionally a `RESOURCES` entry. Put it in a flow's step list to make it part of that flow.
 - The skill graph places topics by `level` and draws lines from `prerequisites`; a prerequisite must be in an earlier level column. Topics in the Library group are left off the graph. Columns stretch to the page width (recomputed on resize), each level has a colour token `--lv-<level>` in `style.css`, and the sidebar turns into a slide-out menu on the graph page (`body.canvas`).
+- New infographic: crop it to the graphic itself (no phone status bars), save it as a JPEG in `assets/img/`, and add a `FIGURES` row with the creator's name for the credit line and the topic ids it belongs on.
 - Add a `NEWS` row for anything readers would notice.
 
 ## Gotchas
