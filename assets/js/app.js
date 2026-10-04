@@ -62,15 +62,16 @@ function redirect(h){history.replaceState(null,'','#'+h);return parse()}
 function base(r){return r.key==='home'?'flows':r.key}
 
 function route(){
-  const r=parse(),same=r.key===cur.key&&r.page!=='graph',regraph=r.page==='graph'&&cur.page==='graph';cur=r;
-  if(regraph){$('#drawer').innerHTML=drawer(r.sel);$('#drawer').hidden=!r.sel;document.body.classList.toggle('drawer-open',!!r.sel);$$('.node').forEach(n=>n.classList.toggle('sel',n.dataset.node===r.sel));$$('.edge').forEach(e=>{const[a,b]=e.dataset.e.split(' ');e.classList.toggle('hot',!!r.sel&&(a===r.sel||b===r.sel))})}
-  else if(!same){const m=$('#main');m.innerHTML=(PAGES[r.page]||PAGES.missing)(r);decorate(m);document.title=pageTitle(r)}
-  else if(r.page==='topic')updateRail();
+  const r=parse(),same=r.key===cur.key&&r.page!=='graph',again=r.page==='graph'&&cur.page==='graph';cur=r;
   document.body.classList.toggle('drawer-open',r.page==='graph'&&!!r.sel);
+  document.body.classList.toggle('canvas',r.page==='graph');
+  if(again){$('#drawer').innerHTML=drawer(r.sel);$('#drawer').hidden=!r.sel;regraph(r.sel)}
+  else if(!same){const m=$('#main');m.innerHTML=(PAGES[r.page]||PAGES.missing)(r);if(r.page==='graph')regraph(r.sel);decorate(m);document.title=pageTitle(r)}
+  else if(r.page==='topic')updateRail();
   if(r.page==='graph'&&r.sel){const n=document.querySelector(`.node[data-node="${r.sel}"]`);if(n)n.scrollIntoView({block:'nearest',inline:'nearest'})}
   sidebar(r);topnav(r);closeMenu();
   if(r.anchor){const el=document.querySelector(`[data-anchor="${CSS.escape(r.anchor)}"]`);if(el){el.scrollIntoView({block:'start'});if(el.classList.contains('item')){el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1600)}}}
-  else if(!same&&!regraph)scrollTo(0,0);
+  else if(!same&&!again)scrollTo(0,0);
 }
 function pageTitle(r){const n='AI Engineering Roadmap';
   if(r.page==='topic')return T[r.id].title+' · '+n;
@@ -85,18 +86,17 @@ const PAGES={
 flows(r){
   return `<div class="page wide"><div class="home-head"><div><div class="eyebrow">Learning flows</div><h1 class="title">Where do you want to go next?</h1></div>${viewSwitch('flows')}</div>
   <p class="lede">Eight paths through the roadmap, from fast foundations to shaping where the field goes. Each step opens a topic page with a checklist, a Senior lens and a reading list. Ticks count in every flow that shares the topic.</p>
-  <div class="ladder" aria-label="Levels">${LEVELS.map(l=>`<div><b>${l[1]}</b><span>${l[2]}</span></div>`).join('')}</div>
+  <div class="ladder" aria-label="Levels">${LEVELS.map(l=>`<div style="--c:var(--lv-${l[0]})"><b>${l[1]}</b><span>${l[2]}</span></div>`).join('')}</div>
   <div class="flows">${FL.map(f=>{const x=fp(f);return `<div class="flow" data-anchor="${f.slug}">${icon(f.ic)}
     <div><h2><a href="#flow/${f.slug}">${esc(f.title)}</a></h2><p>${esc(f.level)} · ${f.steps.length} steps · about ${hours(f.steps)} h</p></div>
     <div class="dots" aria-label="Steps">${f.steps.map((id,i)=>`${i?`<span class="link${stepState(f,i-1)==='done'?' done':''}"></span>`:''}<a class="dot ${stepState(f,i)}" href="#flow/${f.slug}/${i+1}" title="${i+1}. ${esc(T[id].title)} (${tp(id).p}%)">${stepState(f,i)==='done'?icon('check'):i+1}</a>`).join('')}</div>
     <div class="pct" data-fp="${f.slug}">${x.p}%</div></div>`}).join('')}</div></div>`},
 
 graph(r){
-  const g=graphSvg(r.sel);
-  return `<div class="page wide"><div class="home-head"><div><div class="eyebrow">Skill graph</div><h1 class="title">How the topics connect</h1></div>${viewSwitch('graph')}</div>
+  return `<div class="page full"><div class="home-head"><div><div class="eyebrow">Skill graph</div><h1 class="title">How the topics connect</h1></div>${viewSwitch('graph')}</div>
   <p class="lede">Columns run from Know to Shape. Lines point from a topic to the topics that build on it. Select a topic to see its checklist and what it unlocks.</p>
-  <div class="graph-wrap"><div class="graph">${g}</div></div>
-  <div class="legend"><span><i></i>Not started or in progress</span><span><i class="d"></i>Done</span><span><i class="s"></i>Selected</span><span>Reading lists such as books and courses are under <a href="#topics/library">Topics</a>.</span></div></div>
+  <div class="graph-wrap"><div class="graph"></div></div>
+  <div class="legend">${LEVELS.map(l=>`<span style="--c:var(--lv-${l[0]})"><i class="lv"></i>${l[1]}</span>`).join('')}<span><i class="d"></i>Done</span><span>Reading lists such as books and courses are under <a href="#topics/library">Topics</a>.</span></div></div>
   <aside class="drawer" id="drawer" aria-label="Topic details" ${r.sel?'':'hidden'}>${drawer(r.sel)}</aside>`},
 
 flow(r){const f=r.flow,x=fp(f);
@@ -135,7 +135,7 @@ topic(r){const t=T[r.id],x=tp(t.id),f=r.flow;
 topics(r){
   return `<div class="page"><div class="eyebrow">Topics</div><h1 class="title">Every topic in the roadmap</h1>
   <p class="lede">${Object.keys(T).length} topics in ${GROUPS.length} groups. Each has a checklist, a reading list and, for most, a Senior lens.</p>
-  ${GROUPS.map(([g,ids])=>`<section class="group">${H('h2',esc(g),slugify(g),r)}${ids.map(id=>{const t=T[id],x=tp(id);return `<a class="trow" href="#topic/${t.slug}"><span><b>${esc(t.title)}</b><small>${esc(t.desc)}</small></span><span class="chip">${esc(LEVELS[LV[t.level]][1])}</span>${t.items.length?`<span data-tpbar="${id}">${pbar(x)}</span>`:`<span class="mono muted">${t.res.length} readings</span>`}</a>`}).join('')}</section>`).join('')}</div>`},
+  ${GROUPS.map(([g,ids])=>`<section class="group">${H('h2',esc(g),slugify(g),r)}${ids.map(id=>{const t=T[id],x=tp(id);return `<a class="trow" href="#topic/${t.slug}"><span><b>${esc(t.title)}</b><small>${esc(t.desc)}</small></span><span class="chip lv" style="--c:var(--lv-${t.level})">${esc(LEVELS[LV[t.level]][1])}</span>${t.items.length?`<span data-tpbar="${id}">${pbar(x)}</span>`:`<span class="mono muted">${t.res.length} readings</span>`}</a>`}).join('')}</section>`).join('')}</div>`},
 
 progress(r){const all=Object.values(T);let k=0,n=0,started=0;all.forEach(t=>{const x=tp(t.id);k+=x.k;n+=x.n;if(x.k)started++});const p=n?Math.round(k/n*100):0;
   const L=[[10,'Know','Start with Fast foundations. Know every term in chapter 1 cold.'],[30,'Build','Work through Production RAG and Agentic systems, and build as you go.'],[55,'Ship','Make evals, guardrails and observability habits. Finish the capstone.'],[80,'Lead','Take on serving, platform and model trade-offs. Practise system design out loud.'],[101,'Shape','Write and publish your point of view. Run design reviews for others.']];
@@ -161,18 +161,26 @@ const TYPE_IC={paper:'file-text',docs:'book-open',course:'graduation-cap',tool:'
 function readRow([type,title,url,note]){return `<div class="read">${icon(TYPE_IC[type]||'link')}<div><a href="${esc(url)}" target="_blank" rel="noopener">${esc(title)}${icon('external-link')}</a><span class="type">${esc(type)}</span>${note?`<div class="note">${esc(note)}</div>`:''}</div></div>`}
 
 // ---------- Skill graph ----------
-const GW=164,GH=44,CX=190,RY=60,TOPY=40;
-function graphLayout(){const cols=LEVELS.map(()=>[]);ORDER.forEach(id=>{if(T[id].group!=='Library')cols[LV[T[id].level]].push(id)});
+// Columns stretch to fill the width of the page; each level has its own colour (--lv-<level> in style.css).
+const GH=48,RY=64,TOPY=56,PAD=22,GAP=30;
+function graphDims(){const m=$('#main'),cs=getComputedStyle(m),avail=m.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-10;
+  const w=Math.max(LEVELS.length*176,avail),cx=(w-2*PAD+GAP)/LEVELS.length;return{w,cx,gw:cx-GAP}}
+function graphLayout(cx){const cols=LEVELS.map(()=>[]);ORDER.forEach(id=>{if(T[id].group!=='Library')cols[LV[T[id].level]].push(id)});
   // Order each column by the average row of its prerequisites to cut down crossing lines.
   const pos={};cols.forEach((c,ci)=>{if(ci){const k=id=>{const ps=T[id].pre.filter(p=>pos[p]);return ps.length?ps.reduce((a,p)=>a+pos[p].y,0)/ps.length:c.indexOf(id)*RY};c.sort((a,b)=>k(a)-k(b))}
-    c.forEach((id,ri)=>pos[id]={x:16+ci*CX,y:TOPY+ri*RY})});return{cols,pos}}
-function graphSvg(sel){const{cols,pos}=graphLayout(),w=16+LEVELS.length*CX-16,h=TOPY+Math.max(...cols.map(c=>c.length))*RY;
-  let e='',nodes='';
-  Object.keys(pos).forEach(id=>T[id].pre.forEach(p=>{if(!pos[p])return;const a=pos[p],b=pos[id],x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2,m=(x1+x2)/2;
-    e+=`<path class="edge${sel&&(sel===id||sel===p)?' hot':''}" data-e="${p} ${id}" d="M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}"/>`}));
-  Object.entries(pos).forEach(([id,{x,y}])=>{const t=T[id],q=tp(id);
-    nodes+=`<g class="node${q.n&&q.p===100?' done':''}${sel===id?' sel':''}" data-node="${id}" tabindex="0" role="link" aria-label="${esc(t.title)}, ${q.p}% done"><rect class="box" x="${x}" y="${y}" width="${GW}" height="${GH}" rx="8"/><text x="${x+12}" y="${y+21}">${esc(t.title.length>23?t.title.slice(0,22)+'…':t.title)}</text>${q.n?`<rect class="track" x="${x+12}" y="${y+30}" width="${GW-24}" height="3" rx="1.5"/><rect class="fill" x="${x+12}" y="${y+30}" width="${(GW-24)*q.p/100}" height="3" rx="1.5"/>`:''}<title>${esc(t.title)}: ${q.k}/${q.n} done</title></g>`});
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="group" aria-label="Skill graph">${LEVELS.map((l,i)=>`<text class="gcol" x="${16+i*CX}" y="20">${l[1]}</text>`).join('')}${e}${nodes}</svg>`}
+    c.forEach((id,ri)=>pos[id]={x:PAD+ci*cx,y:TOPY+ri*RY})});return{cols,pos}}
+function graphSvg(sel){const{w,cx,gw}=graphDims(),{cols,pos}=graphLayout(cx),h=TOPY+Math.max(...cols.map(c=>c.length))*RY+8;
+  const lv=id=>`var(--lv-${T[id].level})`,max=d=>Math.max(8,Math.floor((gw-(d?46:30))/6.9));
+  const rel=sel?new Set([sel,...T[sel].pre,...T[sel].next]):null;
+  let bands='',defs='',e='',nodes='';
+  LEVELS.forEach((l,i)=>{const x=PAD+i*cx;bands+=`<g style="--c:var(--lv-${l[0]})"><rect class="band" x="${x-10}" y="8" width="${gw+20}" height="${h-12}" rx="12"/><circle class="gdot" cx="${x+5}" cy="31" r="4"/><text class="gcol" x="${x+16}" y="35">${l[1]}</text><text class="gsub" x="${x+16+l[1].length*8.5+8}" y="35">${cols[i].length}</text></g>`});
+  Object.keys(pos).forEach(id=>T[id].pre.forEach(p=>{if(!pos[p])return;const a=pos[p],b=pos[id],x1=a.x+gw,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2,m=(x1+x2)/2,gid='eg-'+p+'-'+id;
+    defs+=`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0" style="stop-color:${lv(p)}"/><stop offset="1" style="stop-color:${lv(id)}"/></linearGradient>`;
+    e+=`<path class="edge${sel&&(sel===id||sel===p)?' hot':''}" data-e="${p} ${id}" stroke="url(#${gid})" d="M${x1} ${y1}C${m} ${y1} ${m} ${y2} ${x2} ${y2}"/>`}));
+  Object.entries(pos).forEach(([id,{x,y}])=>{const t=T[id],q=tp(id),done=q.n&&q.p===100,tw=gw-34;
+    nodes+=`<g class="node${done?' done':''}${sel===id?' sel':''}${rel&&rel.has(id)?' rel':''}" style="--c:${lv(id)}" data-node="${id}" tabindex="0" role="link" aria-label="${esc(t.title)}, ${q.p}% done"><rect class="box" x="${x}" y="${y}" width="${gw}" height="${GH}" rx="9"/><rect class="bar" x="${x+8}" y="${y+10}" width="3" height="${GH-20}" rx="1.5"/><text x="${x+20}" y="${y+22}">${esc(t.title.length>max(done)?t.title.slice(0,max(done)-1)+'…':t.title)}</text>${q.n?`<rect class="track" x="${x+20}" y="${y+32}" width="${tw}" height="4" rx="2"/><rect class="fill" data-w="${tw}" x="${x+20}" y="${y+32}" width="${tw*q.p/100}" height="4" rx="2"/>`:''}<path class="tick" d="M${x+gw-24} ${y+20}l3.5 3.5 7-7"/><title>${esc(t.title)}: ${q.k}/${q.n} done</title></g>`});
+  return `<svg class="${sel?'has-sel':''}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="group" aria-label="Skill graph"><defs>${defs}</defs>${bands}${e}${nodes}</svg>`}
+function regraph(sel){const g=$('#main .graph');if(g)g.innerHTML=graphSvg(sel)}
 function drawer(id){if(!id)return '';
   const t=T[id],x=tp(id);
   return `<a class="iconbtn close" href="#graph" aria-label="Close details">${icon('x')}</a><div class="eyebrow"><span>${esc(LEVELS[LV[t.level]][1])}</span><span>${esc(t.group)}</span></div><h2>${esc(t.full)}</h2><p>${esc(t.desc)}</p>
@@ -206,7 +214,7 @@ function tick(id,v){st[id]=v;if(v)today++;else if(today>0)today--;save();
   $$(`[data-tpbar="${tid}"]`).forEach(e=>e.innerHTML=pbar(tp(tid)));
   $$(`[data-tpk="${tid}"]`).forEach(e=>e.textContent=tp(tid).k+'/'+tp(tid).n);
   FL.forEach(f=>{$$(`[data-fpbar="${f.slug}"]`).forEach(e=>e.innerHTML=pbar(fp(f)));$$(`[data-fp="${f.slug}"]`).forEach(e=>e.textContent=fp(f).p+'%')});
-  const g=document.querySelector(`.node[data-node="${tid}"]`);if(g){const q=tp(tid);g.classList.toggle('done',q.p===100);g.querySelector('rect.fill').setAttribute('width',(GW-24)*q.p/100)}
+  const g=document.querySelector(`.node[data-node="${tid}"]`);if(g){const q=tp(tid);g.classList.toggle('done',q.p===100);const f=g.querySelector('rect.fill');f.setAttribute('width',f.dataset.w*q.p/100)}
   sidebar(cur);toast(v?'Marked done':'Marked not done');
   if(v&&tp(tid).p===100)toast('Topic complete: '+T[tid].title);
 }
@@ -267,5 +275,6 @@ $('#scrim').addEventListener('click',closeMenu);
 $('#themeBtn').addEventListener('click',()=>{const d=document.documentElement,dark=d.dataset.theme?d.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;d.dataset.theme=dark?'light':'dark';pref('ai_roadmap_theme',d.dataset.theme);themeIcon()});
 $('[data-skip]').addEventListener('click',e=>{e.preventDefault();$('#main').focus()});
 addEventListener('hashchange',route);
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(cur.page==='graph')regraph(cur.sel)},120)});
 addEventListener('scroll',()=>{if(cur.page==='topic')updateRail()},{passive:true});
 load();themeIcon();route();

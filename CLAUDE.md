@@ -28,7 +28,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ## Adding content
 
 - New topic: add a section to `data.js`, a `TOPIC_META` row and a `GROUPS` entry in `content.js`, and optionally a `RESOURCES` entry. Put it in a flow's step list to make it part of that flow.
-- The skill graph places topics by `level` and draws lines from `prerequisites`; a prerequisite must be in an earlier level column. Topics in the Library group are left off the graph.
+- The skill graph places topics by `level` and draws lines from `prerequisites`; a prerequisite must be in an earlier level column. Topics in the Library group are left off the graph. Columns stretch to the page width (recomputed on resize), each level has a colour token `--lv-<level>` in `style.css`, and the sidebar turns into a slide-out menu on the graph page (`body.canvas`).
 - Add a `NEWS` row for anything readers would notice.
 
 ## Gotchas

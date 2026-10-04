@@ -80,6 +80,7 @@ const LEGACY={tracker:'progress',map:'flows',guide:'flows'};
 
 // Change log, newest first: [ISO date, title, detail]
 const NEWS=[
+['2026-10-04','Skill graph in colour, full width','Each level has its own colour, the graph stretches across the screen, and selecting a topic highlights what it builds on and leads to.'],
 ['2026-10-04','Redesign: flows, topics and the skill graph','Eight learning flows, a page per topic with a Senior lens, a skill graph on larger screens, a link on every page and heading, and Lucide icons in place of emoji.'],
 ['2026-10-04','Shaping the field','Five new topics: frontier models, agent economics, AI platform strategy, governance and your own point of view.'],
 ['2026-10-04','Map view','Route and depth views of progress. Now part of Flows and the skill graph.'],
