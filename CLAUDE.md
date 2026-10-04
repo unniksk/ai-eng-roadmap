@@ -14,7 +14,7 @@ python3 -m http.server 8000   # or just: open index.html
 
 ## Architecture
 
-- `index.html` holds the static Guide (resource cards, hand-edited HTML) and the Tracker view, switched by the top-right Guide/Tracker buttons (`#tracker` hash deep-links). `assets/js/guide.js` handles the switch, search and type filter.
+- `index.html` holds the static Guide (resource cards, hand-edited HTML) and the Tracker view, plus a Map view, switched by the top-right Guide/Map/Tracker buttons (`#map` and `#tracker` hashes deep-link). `assets/js/guide.js` handles the switch, search and type filter. The Map (metro route plus iceberg depth layers) is drawn by `drawMap()` in `app.js`; the `STOPS` and `ICE` arrays there map section ids to stations and layers, so add a new section's id to them or it won't appear on the Map.
 - `assets/js/data.js` sets `window.TRACKER_SECTIONS`, the array of sections (`{id, c, part?, isNew?, icon?, t, d, items}`). Each item is `[id, label, note, optionalLink]`. This is where all content edits happen.
 - `assets/js/app.js` is a minified-style vanilla-JS renderer: it builds the cards from `TRACKER_SECTIONS`, handles checkbox ticks, per-section and overall stats, the level/readiness message thresholds (array `L` in `stats()`), and JSON export/import/reset. Handlers are inline `onclick`/`onchange` attributes, so the functions must stay global. `index.html` elements are referenced by bare id globals (`sTotal`, `oBar`, `irLevel`, ...), so renaming an element id in `index.html` breaks `stats()`.
 - `assets/css/style.css` supports light and dark mode. `c1`, `c2`, ... in each section's `c` field are colour classes defined here.
