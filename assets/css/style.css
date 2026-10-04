@@ -4,6 +4,7 @@
   --bg:#F7F8FA; --surface:#FFFFFF; --sunk:#EEF0F4; --line:#DFE3EA; --line-strong:#C9CFD9;
   --ink:#14181F; --muted:#5A6372; --faint:#848D9C;
   --accent:#2F5BD3; --accent-ink:#FFFFFF; --accent-soft:#E7ECFA; --done:#2F7D57; --done-soft:#E3F1E9;
+  --lv-know:#3D6FB6; --lv-build:#1F8A8A; --lv-ship:#B7791F; --lv-lead:#7457B8; --lv-shape:#B5476B;
   --f-ui:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-read:"Source Serif 4",Georgia,"Times New Roman",serif;
   --f-mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -13,11 +14,11 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0F1218; --surface:#161A22; --sunk:#1C212B; --line:#272D38; --line-strong:#38404E;
   --ink:#E8EBF0; --muted:#A1A9B7; --faint:#747D8D;
-  --accent:#8AA6F5; --accent-ink:#0F1218; --accent-soft:#1D2742; --done:#5CC08E; --done-soft:#16302A; color-scheme:dark}}
+  --accent:#8AA6F5; --accent-ink:#0F1218; --accent-soft:#1D2742; --done:#5CC08E; --done-soft:#16302A; --lv-know:#8AB0E8; --lv-build:#5CC4C4; --lv-ship:#E0A84E; --lv-lead:#A890E6; --lv-shape:#E28AA6; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0F1218; --surface:#161A22; --sunk:#1C212B; --line:#272D38; --line-strong:#38404E;
   --ink:#E8EBF0; --muted:#A1A9B7; --faint:#747D8D;
-  --accent:#8AA6F5; --accent-ink:#0F1218; --accent-soft:#1D2742; --done:#5CC08E; --done-soft:#16302A; color-scheme:dark}
+  --accent:#8AA6F5; --accent-ink:#0F1218; --accent-soft:#1D2742; --done:#5CC08E; --done-soft:#16302A; --lv-know:#8AB0E8; --lv-build:#5CC4C4; --lv-ship:#E0A84E; --lv-lead:#A890E6; --lv-shape:#E28AA6; color-scheme:dark}
 
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:calc(var(--top) + 20px);-webkit-text-size-adjust:100%}
@@ -64,6 +65,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line-strong)
 main{min-width:0;padding:40px 40px 96px;outline:none}
 .page{max-width:780px;margin:0 auto}
 .page.wide{max-width:1120px}
+.page.full{max-width:none}
 .with-rail{display:grid;grid-template-columns:minmax(0,780px) 200px;gap:56px;justify-content:center}
 .rail{position:sticky;top:calc(var(--top) + 32px);align-self:start;font-size:13.5px}
 .rail .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
@@ -121,7 +123,8 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 /* Flows list */
 .home-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px}
 .ladder{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin:24px 0 8px}
-.ladder div{padding:12px 14px;border-left:1px solid var(--line);min-width:0}
+.ladder div{padding:12px 14px;border-left:1px solid var(--line);min-width:0;box-shadow:inset 0 3px 0 var(--c,transparent)}
+.ladder b{color:var(--c)}
 .ladder div:first-child{border-left:0}
 .ladder b{display:block;font-size:14px;font-weight:600}
 .ladder span{font-size:12.5px;color:var(--muted)}
@@ -188,6 +191,14 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 .pager small{display:block;font-family:var(--f-mono);font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
 .pager .nx{text-align:right;grid-column:2}
 
+/* Figures */
+.fig{margin:0 0 24px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.fig a:has(img){display:block;background:#fff;cursor:zoom-in}
+.fig img{display:block;width:100%;height:auto}
+.fig figcaption{padding:12px 16px;font-size:14.5px;color:var(--muted);border-top:1px solid var(--line)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.fig .credit{display:block;margin-top:4px;font-size:12.5px;color:var(--faint)}
+
 /* Topics index */
 .group{margin-top:36px}
 .trow{display:grid;grid-template-columns:minmax(0,1fr) 72px 150px;gap:16px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);color:var(--ink)}
@@ -200,20 +211,27 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 .graph-wrap{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-top:24px}
 .graph{overflow-x:auto;padding:8px 4px}
 .graph svg{display:block}
-.gcol{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;fill:var(--faint)}
-.edge{fill:none;stroke:var(--line-strong);stroke-width:1.2}
-.edge.hot{stroke:var(--accent);stroke-width:2}
-.node{cursor:pointer}
-.node rect.box{fill:var(--surface);stroke:var(--line-strong);stroke-width:1.2}
-.node text{fill:var(--ink);font-family:var(--f-ui);font-size:12.5px}
-.node rect.track{fill:var(--sunk)}
-.node rect.fill{fill:var(--ink)}
-.node.done rect.box{fill:var(--done-soft);stroke:var(--done)}
-.node.done rect.fill{fill:var(--done)}
-.node:hover rect.box{stroke:var(--ink)}
-.node.sel rect.box{stroke:var(--accent);stroke-width:2.2}
+.band{fill:color-mix(in srgb,var(--c) 5%,transparent)}
+.gdot{fill:var(--c)}
+.gcol{font-family:var(--f-mono);font-size:11.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;fill:var(--c)}
+.gsub{font-family:var(--f-mono);font-size:11px;fill:var(--faint)}
+.edge{fill:none;stroke-width:1.4;opacity:.5;transition:opacity .15s}
+.edge.hot{opacity:1;stroke-width:2.6}
+.has-sel .edge:not(.hot){opacity:.12}
+.node{cursor:pointer;transition:opacity .15s}
+.has-sel .node:not(.rel){opacity:.4}
+.node rect.box{fill:color-mix(in srgb,var(--c) 7%,var(--surface));stroke:color-mix(in srgb,var(--c) 38%,var(--line));stroke-width:1.2}
+.node rect.bar{fill:var(--c)}
+.node text{fill:var(--ink);font-family:var(--f-ui);font-size:13px;font-weight:500}
+.node rect.track{fill:color-mix(in srgb,var(--c) 14%,var(--sunk))}
+.node rect.fill{fill:var(--c)}
+.node .tick{fill:none;stroke:var(--c);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:none}
+.node.done .tick{display:inline}
+.node.done rect.box{fill:color-mix(in srgb,var(--c) 20%,var(--surface));stroke:var(--c)}
+.node:hover rect.box{stroke:var(--c);stroke-width:1.8}
+.node.sel rect.box{stroke:var(--c);stroke-width:2.6;fill:color-mix(in srgb,var(--c) 14%,var(--surface))}
 .node:focus-visible{outline:none}
-.node:focus-visible rect.box{stroke:var(--accent);stroke-width:2.2}
+.node:focus-visible rect.box{stroke:var(--ink);stroke-width:2.4}
 .drawer{position:fixed;right:0;top:var(--top);bottom:0;width:min(380px,92vw);overflow-y:auto;z-index:25;background:var(--surface);border-left:1px solid var(--line);box-shadow:-16px 0 40px rgba(10,15,25,.10);padding:22px 22px 40px;font-size:14.5px}
 .drawer .close{float:right;margin:-6px -8px 0 0}
 .drawer h2{font-size:19px;margin:6px 0 6px}
@@ -224,8 +242,10 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:13px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:7px}
 .legend i{width:14px;height:10px;border-radius:3px;border:1.2px solid var(--line-strong);background:var(--surface)}
-.legend i.d{background:var(--done-soft);border-color:var(--done)}
-.legend i.s{border:2px solid var(--accent)}
+.legend i.lv{background:color-mix(in srgb,var(--c) 14%,var(--surface));border-color:var(--c);box-shadow:inset 3px 0 0 var(--c)}
+.legend i.d{background:var(--sunk);border-color:var(--line-strong);position:relative}
+.legend i.d::after{content:"";position:absolute;left:4px;top:0;width:3px;height:6px;border:solid var(--ink);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.chip.lv{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
 
 @media (min-width:1100px){body.drawer-open main{padding-right:420px}}
 
@@ -257,6 +277,11 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 
 /* Responsive */
 @media (max-width:1279px){.with-rail{display:block}.rail{display:none}}
+/* The skill graph uses the whole width: the sidebar becomes a slide-out menu there, as on small screens. */
+body.canvas .layout{grid-template-columns:minmax(0,1fr)}
+body.canvas .menu{display:inline-grid}
+body.canvas .sidebar{position:fixed;top:0;left:0;bottom:0;height:auto;width:min(300px,86vw);background:var(--bg);z-index:40;transform:translateX(-102%);transition:transform .2s;padding-top:calc(env(safe-area-inset-top,0px) + 18px)}
+body.canvas .sidebar.open{transform:none}
 @media (max-width:960px){
   .layout{grid-template-columns:minmax(0,1fr)}
   .menu{display:inline-grid}
