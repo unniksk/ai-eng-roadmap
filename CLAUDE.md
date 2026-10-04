@@ -4,29 +4,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A static, single-page AI-engineering progress tracker deployed on GitHub Pages. No build step, no dependencies, no tests, no linter. Progress lives in the visitor's browser `localStorage` (key `ai_tracker_v3`), never in the repo.
+A static, single-page AI engineering roadmap for senior engineers, deployed on GitHub Pages: learning flows, a page per topic, a skill graph and a progress tracker. No build step, no dependencies, no tests, no linter. Progress lives in the visitor's browser `localStorage` (key `ai_tracker_v3`), never in the repo.
 
 ## Run locally
 
 ```bash
-python3 -m http.server 8000   # or just: open index.html
+python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 ## Architecture
 
-- `index.html` holds the static Guide (resource cards, hand-edited HTML) and the Tracker view, plus a Map view, switched by the top-right Guide/Map/Tracker buttons (`#map` and `#tracker` hashes deep-link). `assets/js/guide.js` handles the switch, search and type filter. The Map (metro route plus iceberg depth layers) is drawn by `drawMap()` in `app.js`; the `STOPS` and `ICE` arrays there map section ids to stations and layers, so add a new section's id to them or it won't appear on the Map.
-- `assets/js/data.js` sets `window.TRACKER_SECTIONS`, the array of sections (`{id, c, part?, isNew?, icon?, t, d, items}`). Each item is `[id, label, note, optionalLink]`. This is where all content edits happen.
-- `assets/js/app.js` is a minified-style vanilla-JS renderer: it builds the cards from `TRACKER_SECTIONS`, handles checkbox ticks, per-section and overall stats, the level/readiness message thresholds (array `L` in `stats()`), and JSON export/import/reset. Handlers are inline `onclick`/`onchange` attributes, so the functions must stay global. `index.html` elements are referenced by bare id globals (`sTotal`, `oBar`, `irLevel`, ...), so renaming an element id in `index.html` breaks `stats()`.
-- `assets/css/style.css` supports light and dark mode. `c1`, `c2`, ... in each section's `c` field are colour classes defined here.
-- `404.html` redirects to the tracker; `.nojekyll` makes Pages serve files as-is.
+- `index.html` is a shell: top bar, sidebar and an empty `<main>`. Everything is rendered by `assets/js/app.js` from the hash route.
+- Routes (all shareable): `#flows`, `#graph[/topic-slug]`, `#flow/<slug>`, `#flow/<slug>/<step>` (a topic page in flow context), `#topics`, `#topic/<slug>`, `#progress`, `#new`. Any route can take one more segment that scrolls to a heading or checklist item, e.g. `#topic/graphrag/reading-list` or `#topic/graphrag/gr-3`. An empty hash shows the graph on screens 1024px and wider, flows otherwise (the List/Graph switch remembers a choice). Old links redirect: `#tracker`, `#map`, `#guide` via `LEGACY`, and bare section ids like `#ch13`.
+- `assets/js/data.js` sets `window.TRACKER_SECTIONS` (`{id, c, part?, isNew?, icon?, t, d, items}`); each item is `[id, label, note, optionalLink]`. Checklist content lives here.
+- `assets/js/resources.js` sets `window.RESOURCES`: the reading list per section id, `[type, title, url, note]`. Types: paper, docs, course, tool, repo, blog, video, report.
+- `assets/js/content.js` holds page structure: `LEVELS`, `TOPIC_META` (slug, short title, level, hours, prerequisites, Senior lens), `GROUPS` (topic index and sidebar order), `FLOWS`, `LEGACY`, `NEWS` (the What's new page), `EXTRA_DESC` and `TOPIC_LINKS` (companion pages such as `system-design.html`).
+- `assets/js/icons.js` has the Lucide icons the site uses (ISC licence); `icon(name)` returns inline SVG. Copy any new icon's inner SVG from lucide-static.
+- `assets/js/app.js` is the router, page renderers, skill graph layout, search (`/` to focus), progress updates and export/import/reset. Events are delegated from `document`; there are no inline handlers.
+- `assets/css/style.css`: neutral palette with one accent, light and dark (system setting plus a toggle stored in `ai_roadmap_theme`). Fonts are Geist, Source Serif 4 and Geist Mono from Google Fonts, with system fallbacks.
+- `system-design.html` is a standalone interactive guide to LLM serving, linked from the `sysdesign` topic. Its sections and headings have their own anchors.
+- `404.html` redirects to the home page; `.nojekyll` makes Pages serve files as-is.
+
+## Adding content
+
+- New topic: add a section to `data.js`, a `TOPIC_META` row and a `GROUPS` entry in `content.js`, and optionally a `RESOURCES` entry. Put it in a flow's step list to make it part of that flow.
+- The skill graph places topics by `level` and draws lines from `prerequisites`; a prerequisite must be in an earlier level column. Topics in the Library group are left off the graph.
+- Add a `NEWS` row for anything readers would notice.
 
 ## Gotchas
 
 - **Never rename or reuse an existing item `id`** in `data.js`: saved progress in users' browsers is keyed on it.
-- A tracker section's "To read" list is pulled from the Guide element with the same `id` (e.g. `ch1`, `courses`, `adv-eng`). Give a new section a matching `id` in `index.html` to get one.
+- **Never change a published topic or flow slug**: shared links use them. Add a redirect instead.
 - Bump the `KEY` in `app.js` only if you intend to discard everyone's saved progress.
-- Section headers (`part`) render only when they differ from the previous section's `part`, so keep sections of the same part adjacent.
-- Item text is passed through `esc()` (escapes `&` and `<` only), but the optional link (4th element) is inserted unescaped into an `href`.
+- All text and links pass through `esc()` before being inserted into HTML.
 
 ## Public repo: never commit secrets or PII
 
