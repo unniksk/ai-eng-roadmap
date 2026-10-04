@@ -1,0 +1,31 @@
+name: Link check
+on:
+  schedule:
+    - cron: '17 6 * * 1'   # Mondays 06:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check reading-list and checklist links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Many publishers block bots with 403 or rate-limit with 429, so those are not treated as dead.
+          args: >-
+            --no-progress --max-concurrency 8 --timeout 30 --max-retries 2
+            --accept 200..=299,403,429
+            --exclude-path share
+            assets/js/resources.js assets/js/data.js assets/js/content.js system-design.html
+          fail: false
+      - name: Open an issue for broken links
+        if: steps.lychee.outputs.exit_code != 0
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: Broken links in the roadmap
+          content-filepath: ./lychee/out.md
+          labels: links

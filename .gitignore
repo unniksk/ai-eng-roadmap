@@ -4,3 +4,5 @@ tracker-progress-*.json
 .env*
 *.pem
 *.key
+node_modules/
+lychee/

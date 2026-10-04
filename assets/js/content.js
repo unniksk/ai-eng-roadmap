@@ -88,6 +88,8 @@ const LEGACY={tracker:'progress',map:'flows',guide:'flows'};
 
 // Change log, newest first: [ISO date, title, detail]
 const NEWS=[
+['2026-10-04','Anki cards, notes and depth of knowledge','Flashcards on every topic with a spaced-repetition review and Anki download; notes per topic exported as Markdown; ticked checks can be marked Read, Can explain or Built; a progress link moves your ticks to another device.'],
+['2026-10-04','Better link previews','Copied topic, flow and radar links now show their own title and description when pasted into chat or social media.'],
 ['2026-10-04','Technology radar and four new topics','A radar of what to adopt, trial, assess or hold, plus AI-native software development, agent security and identity, evaluating agents, and data flywheels.'],
 ['2026-10-04','Context engineering and harness engineering','Two new topics in Agentic systems, both part of the Agentic systems flow, plus reading-list links to well-known infographic series from ByteByteGo, Daily Dose of Data Science and SwirlAI.'],
 ['2026-10-04','Visual summaries','Infographics on LLM evaluation methods, RAG in production and the silent failure modes of agents, shown on the topics they cover and collected on the Visuals page.'],
@@ -107,9 +109,9 @@ const TOPIC_LINKS={sysdesign:['system-design.html','The LLM serving stack, stop 
 // Infographics shown on topic pages and on the Visuals page (#visuals). Files live in assets/img/.
 // [slug, file, title, credit, summary, topic ids, original source URL or '']
 const FIGURES=[
-['llm-evaluation-methods','llm-evaluation-methods.jpg','11 LLM evaluation methods','Avi Chawla, Daily Dose of Data Science','G-Eval, ROUGE, BLEU, LLM-as-judge, BERTScore, human evaluation, multi-turn evaluation, safety evaluation, LLM juries, DAG evaluation and agent trajectory accuracy, each drawn as a short pipeline with what it measures.',['ch6','ch7','ch8','ch9'],'https://blog.dailydoseofds.com/p/11-llm-evaluation-methods'],
-['rag-in-production','rag-in-production.jpg','Design, evaluate, debug and operate RAG in production','@gen_ai_learning','Offline ingestion and online query pipelines, retrieval strategies, retrieval, generation and system metrics with worked recall, precision and MRR examples, a ten-step debugging checklist, what to log, a monitoring dashboard, offline versus online evaluation and common interview questions.',['ch13','knowledge','capstone','graphrag'],''],
-['agent-silent-killers','agent-silent-killers.jpg','9 silent killers of AI agents in production','Prem Natarajan','Tool definition bloat, context window decay, retrieval poisoning, runaway loops, silent schema drift, eval blindness, hidden non-determinism, cost blind spots and no failure mode, each with its fix.',['ch10','ch12','ctx-eng','ch14','harness','ch16','ch18','adv-eng'],'']];
+['llm-evaluation-methods','llm-evaluation-methods.webp','11 LLM evaluation methods','Avi Chawla, Daily Dose of Data Science','G-Eval, ROUGE, BLEU, LLM-as-judge, BERTScore, human evaluation, multi-turn evaluation, safety evaluation, LLM juries, DAG evaluation and agent trajectory accuracy, each drawn as a short pipeline with what it measures.',['ch6','ch7','ch8','ch9'],'https://blog.dailydoseofds.com/p/11-llm-evaluation-methods'],
+['rag-in-production','rag-in-production.webp','Design, evaluate, debug and operate RAG in production','@gen_ai_learning','Offline ingestion and online query pipelines, retrieval strategies, retrieval, generation and system metrics with worked recall, precision and MRR examples, a ten-step debugging checklist, what to log, a monitoring dashboard, offline versus online evaluation and common interview questions.',['ch13','knowledge','capstone','graphrag'],''],
+['agent-silent-killers','agent-silent-killers.webp','9 silent killers of AI agents in production','Prem Natarajan','Tool definition bloat, context window decay, retrieval poisoning, runaway loops, silent schema drift, eval blindness, hidden non-determinism, cost blind spots and no failure mode, each with its fix.',['ch10','ch12','ctx-eng','ch14','harness','ch16','ch18','adv-eng'],'']];
 
 // Technology radar (#radar): an opinionated view of what to adopt, trial, assess or hold. Review it every quarter.
 // [name, quadrant, ring, why, topic id]

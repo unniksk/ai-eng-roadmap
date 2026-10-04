@@ -311,7 +311,11 @@ function importProgress(inp){const f=inp.files[0];if(!f)return;f.text().then(t=>
 function resetAll(){if(confirm('Reset all progress? This cannot be undone. Export a backup first if you might want it back.')){st={};today=0;save();cur.key=null;route();toast('Progress reset')}}
 
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800)}
-function copyLink(h,msg){const u=location.origin+location.pathname+h;
+// Topic, flow and radar links are shared through share/*.html so they get their own link preview.
+function shareUrl(h){let m=h.match(/^#topic\/([\w-]+)(?:\/(.+))?$/);if(m)return `share/topic-${m[1]}.html${m[2]?'#'+m[2]:''}`;
+  m=h.match(/^#flow\/([\w-]+)(?:\/(.+))?$/);if(m)return `share/flow-${m[1]}.html${m[2]?'#'+m[2]:''}`;
+  m=h.match(/^#radar(?:\/(.+))?$/);if(m)return `share/radar.html${m[1]?'#'+m[1]:''}`;return null}
+function copyLink(h,msg){const dir=location.pathname.replace(/[^/]*$/,''),s=shareUrl(h),u=location.origin+(s?dir+s:location.pathname+h);
   const done=()=>toast(msg||'Link copied');
   try{navigator.clipboard.writeText(u).then(done,()=>toast('Copy the address bar to share this link'))}catch(e){toast('Copy the address bar to share this link')}}
 

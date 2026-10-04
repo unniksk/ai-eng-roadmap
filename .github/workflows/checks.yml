@@ -1,0 +1,26 @@
+name: Checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Share pages are up to date
+        run: |
+          node tools/build-share-pages.mjs
+          git diff --exit-code -- share || (echo "share/ is stale: run node tools/build-share-pages.mjs and commit the result" && exit 1)
+      - name: Install Playwright
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: Smoke test every route
+        run: |
+          python3 -m http.server 8000 &
+          sleep 1
+          node tests/smoke.mjs

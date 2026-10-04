@@ -351,6 +351,9 @@ body.canvas .sidebar.open{transform:none}
   .ladder b{font-size:13px}
   .ladder span{display:none}
   .brand .x{display:none}
+  .flow .dot{width:20px;height:20px;font-size:9.5px}
+  .flow .link{min-width:3px}
+  .flow .dots{min-width:0}
   .lens div{grid-template-columns:1fr;gap:4px}
   .trow{grid-template-columns:minmax(0,1fr) 90px}
   .trow .chip{display:none}
