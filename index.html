@@ -62,6 +62,7 @@
     <a class="nav-extra" href="#papers">📄 Research Papers</a>
     <div class="nav-extra-label">Intermediate and Advanced</div>
     <a class="nav-extra" href="#knowledge">🧱 Knowledge systems depth</a>
+    <a class="nav-extra" href="#graphrag">🕸 GraphRAG and advanced retrieval</a>
     <a class="nav-extra" href="#adv-eng">🧭 Advanced: Engineering</a>
     <a class="nav-extra" href="#adv-dl">🧮 Advanced: Deep learning and math</a>
     <a class="nav-extra" href="#sysdesign">🏗 Advanced: System design</a>
@@ -589,6 +590,25 @@
     <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/1603.09320" target="_blank">HNSW: Efficient and Robust Approximate Nearest Neighbor Search</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">The graph index behind most vector databases. Explains the recall, latency and memory tradeoffs of vector search.</div></div></div>
     <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://fastapi.tiangolo.com/tutorial/" target="_blank">FastAPI Tutorial</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">Request models, dependency injection and async endpoints for wrapping an LLM pipeline as a service.</div></div></div>
     <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" target="_blank">MDN: Server-Sent Events</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">The transport most chat UIs use to stream tokens from a FastAPI endpoint.</div></div></div>
+  </div>
+</div>
+
+<!-- graphrag -->
+<div id="graphrag" class="extra-section" style="margin-top:1.5rem">
+  <div class="extra-header">
+    <h2>🕸 Intermediate · GraphRAG and advanced retrieval</h2>
+    <p>Knowledge graphs for retrieval, hierarchical and multi-hop methods, and RAG variants that decide when and how to retrieve.</p>
+  </div>
+  <div class="extra-grid">
+    <div class="resource-card" data-type="docs"><div class="resource-icon">📖</div><div class="resource-body"><div class="resource-title"><a href="https://microsoft.github.io/graphrag/" target="_blank">Microsoft GraphRAG documentation</a><span class="tag tag-docs">Docs</span></div><div class="resource-note">Indexing pipeline, local vs global search and prompt tuning for the reference GraphRAG implementation.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2408.08921" target="_blank">Graph Retrieval-Augmented Generation: A Survey</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Survey of graph-based RAG: graph construction, retrieval and generation. A map of the whole area.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2410.05779" target="_blank">LightRAG: Simple and Fast Retrieval-Augmented Generation</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Dual-level graph retrieval with cheap incremental updates. A lighter alternative to full GraphRAG.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2405.14831" target="_blank">HippoRAG: Neurobiologically Inspired Long-Term Memory</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Knowledge graph plus personalised PageRank for multi-hop retrieval.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2401.18059" target="_blank">RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Cluster and summarise chunks into a tree so queries can hit the right level of detail.</div></div></div>
+    <div class="resource-card" data-type="repo"><div class="resource-icon">🗄</div><div class="resource-body"><div class="resource-title"><a href="https://github.com/neo4j/neo4j-graphrag-python" target="_blank">Neo4j GraphRAG for Python</a><span class="tag tag-repo">Repo</span></div><div class="resource-note">Official package for building knowledge graphs from text and retrieving from Neo4j (vector, hybrid, Text2Cypher).</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2310.11511" target="_blank">Self-RAG: Learning to Retrieve, Generate and Critique</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">The model decides when to retrieve and critiques its own retrieved passages.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2401.15884" target="_blank">Corrective RAG (CRAG)</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Grade retrieved documents and fall back to other sources when retrieval is poor.</div></div></div>
+    <div class="resource-card" data-type="paper"><div class="resource-icon">📄</div><div class="resource-body"><div class="resource-title"><a href="https://arxiv.org/abs/2212.10496" target="_blank">HyDE: Precise Zero-Shot Dense Retrieval without Relevance Labels</a><span class="tag tag-paper">Paper</span></div><div class="resource-note">Embed a hypothetical answer instead of the raw query to improve retrieval.</div></div></div>
   </div>
 </div>
 

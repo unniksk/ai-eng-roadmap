@@ -218,6 +218,17 @@ window.TRACKER_SECTIONS=[
 ['k-2','Metadata filtering and permissions-aware retrieval','Filter by tenant, role and date at query time, not after.'],
 ['k-3','Vector search internals (ANN, HNSW)','Recall vs latency vs memory; when brute force is fine.'],
 ['k-4','Serving RAG with FastAPI','Async endpoints, streaming responses, request validation.']]},
+{id:'graphrag',c:'ck',icon:'🕸',isNew:1,t:'Intermediate · GraphRAG and advanced retrieval',d:'Knowledge graphs for retrieval, hierarchical and multi-hop methods, and RAG that decides when and how to retrieve.',items:[
+['gr-1','When flat RAG fails','Multi-hop and whole-corpus questions that top-k chunks cannot answer.'],
+['gr-2','Knowledge graph construction','LLM entity and relation extraction, schema, entity resolution and dedup.'],
+['gr-3','Microsoft GraphRAG: local vs global search','Community detection, community summaries, and which query type needs which.'],
+['gr-4','Graph stores and Text2Cypher','Property graphs (Neo4j), vector plus graph hybrid, LLM-written graph queries.'],
+['gr-5','Lightweight graph RAG: LightRAG, HippoRAG','Cheaper indexing, incremental updates, personalised PageRank retrieval.'],
+['gr-6','Hierarchical retrieval: RAPTOR','Tree of recursive summaries for questions at different levels of detail.'],
+['gr-7','Query rewriting and HyDE','Rewrite, decompose or hypothesise before embedding the query.'],
+['gr-8','Self-RAG and Corrective RAG','Retrieve on demand, grade retrieved context, fall back when it is poor.'],
+['gr-9','Agentic RAG','An agent picks vector, graph, SQL or web per question and loops until it can answer.'],
+['gr-10','Evaluating graph RAG vs vector RAG','Compare cost, latency, indexing time and answer quality on your own questions.']]},
 {id:'adv-eng',c:'cp',icon:'🧭',isNew:1,t:'Advanced · Engineering track',d:'Reachable by building well: agent patterns, memory, GraphRAG, red teaming, routing, serving, caching.',items:[
 ['a-1','ReAct and planning patterns','Reason-act-observe, plan-then-execute, reflection.'],
 ['a-2','State, memory and context compaction','What to keep, summarize or drop as a run grows.'],
