@@ -191,6 +191,55 @@ h3.hd{font-size:17px;margin:32px 0 10px}
 .pager small{display:block;font-family:var(--f-mono);font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
 .pager .nx{text-align:right;grid-column:2}
 
+/* Depth of knowledge on a ticked check */
+.depth{display:inline-flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.depth button{font-size:12.5px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:2px 10px;cursor:pointer}
+.depth button:hover{border-color:var(--line-strong);color:var(--ink)}
+.depth button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+/* Notes */
+textarea.notes{width:100%;font:inherit;font-family:var(--f-read);font-size:16.5px;line-height:1.6;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;resize:vertical;min-height:120px}
+textarea.notes:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+/* Anki cards and review */
+.cards{display:grid;gap:8px}
+.fcard{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.fcard summary{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:12px 16px;cursor:pointer;font-weight:500;list-style:none}
+.fcard summary::-webkit-details-marker{display:none}
+.fcard summary:hover .hl{opacity:1}
+.fcard[open] summary{border-bottom:1px solid var(--line)}
+.fcard p{margin:0;padding:12px 16px;font-family:var(--f-read);font-size:16.5px;line-height:1.55}
+.fcard small{display:block;padding:0 16px 10px;color:var(--faint);font-size:12.5px}
+.rev{margin-top:20px}
+.rev-meta{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.rev-card{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:32px 28px;min-height:240px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.rev-card .front{font-size:22px;font-weight:600;line-height:1.35;margin:0;text-wrap:balance}
+.rev-card .back{font-family:var(--f-read);font-size:18.5px;line-height:1.6;margin:0;padding-top:16px;border-top:1px solid var(--line)}
+.rev-card.done h2{margin:0}
+.grades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.grades .btn{flex-direction:column;justify-content:center;gap:0}
+.grades small{font-family:var(--f-mono);font-size:11px;opacity:.75}
+
+/* Radar */
+.ring-adopt{--c:var(--done)}.ring-trial{--c:var(--accent)}.ring-assess{--c:var(--lv-ship)}.ring-hold{--c:var(--lv-shape)}
+.rings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin:20px 0}
+.rings div{padding:12px 14px;border-left:1px solid var(--line);box-shadow:inset 0 3px 0 var(--c);min-width:0}
+.rings div:first-child{border-left:0}
+.rings b{display:block;color:var(--c)}
+.rings span{font-size:13px;color:var(--muted)}
+.radar-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table.radar{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+table.radar th,table.radar td{padding:12px;border-top:1px solid var(--line);vertical-align:top;text-align:left}
+table.radar thead th{border-top:0;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--c,var(--muted))}
+table.radar tbody th{font-weight:600;width:150px}
+table.radar td{border-left:1px solid var(--line)}
+.blip{display:block;margin:0 0 6px;padding:5px 9px;border-radius:7px;border:1px solid color-mix(in srgb,var(--c) 40%,var(--line));background:color-mix(in srgb,var(--c) 8%,var(--surface));color:var(--ink);line-height:1.35}
+.blip:hover{border-color:var(--c);text-decoration:none}
+.dotring{width:12px;height:12px;border-radius:50%;background:var(--c);margin-top:7px;justify-self:center}
+.chip.ring{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.chip.start{color:var(--done);border-color:color-mix(in srgb,var(--done) 45%,var(--line));margin-left:8px}
+.radar-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14.5px;color:var(--muted);margin:-8px 0 16px}
+
 /* Figures */
 .fig{margin:0 0 24px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
 .fig a:has(img){display:block;background:#fff;cursor:zoom-in}
@@ -302,6 +351,9 @@ body.canvas .sidebar.open{transform:none}
   .ladder b{font-size:13px}
   .ladder span{display:none}
   .brand .x{display:none}
+  .flow .dot{width:20px;height:20px;font-size:9.5px}
+  .flow .link{min-width:3px}
+  .flow .dots{min-width:0}
   .lens div{grid-template-columns:1fr;gap:4px}
   .trow{grid-template-columns:minmax(0,1fr) 90px}
   .trow .chip{display:none}
@@ -309,6 +361,11 @@ body.canvas .sidebar.open{transform:none}
   .stats div:nth-child(3){border-left:0}
   .stats div:nth-child(n+3){border-top:1px solid var(--line)}
   .news li{grid-template-columns:1fr;gap:4px}
+  .rings{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rings div:nth-child(3){border-left:0}
+  .rings div:nth-child(n+3){border-top:1px solid var(--line)}
+  .grades{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rev-card{padding:24px 18px}
   .pager{grid-template-columns:1fr}
   .pager .nx{grid-column:1}
   .prow{grid-template-columns:minmax(0,1fr) 110px}

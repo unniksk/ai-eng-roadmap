@@ -54,15 +54,20 @@ const TOPIC_META=[
 ,
 ['ctx-eng','context-engineering','Context engineering','build',4,['ch5'],['Every token competes for the model\'s attention: more context helps recall of facts and hurts precision on instructions.','In a long run, early rules and tool definitions get buried or pushed out, and the agent quietly stops following them.','What is in the context at step 30, and who decided it should be there?']],
 ['harness','harness-engineering','Harness engineering','ship',5,['ch12','ch14'],['A thick harness makes an agent predictable; a thin one lets a stronger model do more. Choose per task, and revisit when models improve.','No stop conditions or permission checks, so a loop runs up cost or takes an action that cannot be undone.','If we swapped the model tomorrow, which parts of the harness would have to change?']]
+,
+['coding-agents','coding-agents','AI-native development','lead',5,['harness'],['Agents speed up writing code and move the bottleneck to specifying, reviewing and testing it.','Large agent-written changes merged after a quick skim, so subtle bugs and security holes ship in confident-looking code.','What would have to be true about our tests for us to trust an agent-written change without reading every line?']],
+['agent-security','agent-security','Agent security and identity','lead',5,['ch9','ch12'],['Every capability you give an agent is also given to anyone who can get text into its context.','An agent with inbox access summarises an email with hidden instructions and forwards private data to an attacker.','If an attacker controls one document this agent reads, what is the worst thing they can make it do?']],
+['agent-evals','agent-evals','Evaluating agents','lead',4,['ch8','ch10'],['End-state checks are cheap and robust; trajectory checks catch waste and risky paths but break on valid alternatives.','An agent passes a benchmark once, then fails half the time in production because nobody ran it more than once.','How many runs per task do we do, and what are the pass rate and its spread?']],
+['data-flywheel','data-flywheel','Data flywheels','lead',4,['ch16','ch7'],['Collecting data is cheap; labelling it and acting on it is where the cost is.','Thumbs-down feedback piles up in a table nobody reads, so the product never improves.','Which production failure did we fix last week, and how did we find it?']]
 ];
 
 // Topic groups for the Topics index and the sidebar. Order matters.
 const GROUPS=[
   ['Foundations',['ch1','ch2','ch3','ch4','ch5']],
-  ['Evaluation',['ch6','ch7','ch8','ch9']],
-  ['Agentic systems',['ch10','ch11','ch12','ctx-eng','ch14','harness','ch15','ch17']],
+  ['Evaluation',['ch6','ch7','ch8','ch9','agent-evals']],
+  ['Agentic systems',['ch10','ch11','ch12','ctx-eng','ch14','harness','ch15','ch17','agent-security','coding-agents']],
   ['Knowledge systems',['ch13','knowledge','graphrag']],
-  ['Production',['ch16','ch18','capstone','sysdesign']],
+  ['Production',['ch16','ch18','data-flywheel','capstone','sysdesign']],
   ['Advanced',['adv-eng','adv-dl']],
   ['Leadership and vision',['gaps','ch19','ch20','frontier','agent-econ','ai-org','governance','pov']],
   ['Library',['labs','oreilly','courses','opensource','youtube','blogs','papers']]];
@@ -70,12 +75,12 @@ const GROUPS=[
 // Learning flows: an ordered path through topics. [slug, title, icon, level label, description, step topic ids, build-this exercise]
 const FLOWS=[
 ['fast-foundations','Fast foundations','zap','Know','Chapters 1–5 condensed for people who have shipped software for years. Mostly a weekend of skimming.',['ch1','ch2','ch3','ch4','ch5'],'Write a one-page model selection memo for a product you know: the task, three candidate models, an eval plan and the cost per thousand requests.'],
-['evals','Evals as a discipline','flask-conical','Ship','From why evals matter to code checks, calibrated judges, guardrails and tracing.',['ch6','ch7','ch8','ch9','ch16'],'Build an eval suite of 50 labelled cases with code checks and a calibrated LLM judge, running in CI on every prompt change.'],
+['evals','Evals as a discipline','flask-conical','Ship','From why evals matter to code checks, calibrated judges, guardrails and tracing.',['ch6','ch7','ch8','ch9','ch16','agent-evals'],'Build an eval suite of 50 labelled cases with code checks and a calibrated LLM judge, running in CI on every prompt change.'],
 ['production-rag','Production RAG to GraphRAG','database','Build → Lead','Retrieval that holds up in production, then graph-based and agentic retrieval for the questions it cannot answer.',['ch13','knowledge','graphrag','capstone'],'Build a hybrid retriever over your own documents with recall@10 measured, then compare a GraphRAG index on 20 multi-hop questions.'],
-['agentic-systems','Agentic systems','bot','Build → Lead','Single calls to agents: workflows, tools, memory, multi-agent patterns, protocols and red teaming.',['ch10','ch11','ch12','ctx-eng','ch14','harness','ch15','ch17','adv-eng'],'Build an agent with three tools, a step budget, traced runs and an adversarial test set it must pass.'],
+['agentic-systems','Agentic systems','bot','Build → Lead','Single calls to agents: workflows, tools, memory, multi-agent patterns, protocols and red teaming.',['ch10','ch11','ch12','ctx-eng','ch14','harness','ch15','ch17','agent-security','adv-eng'],'Build an agent with three tools, a step budget, traced runs and an adversarial test set it must pass.'],
 ['llm-serving','LLM serving and infrastructure','server','Lead','How a request reaches a GPU and back, and what it costs: routing, batching, caching, sizing and readiness.',['sysdesign','adv-eng','ch16','ch18'],'Serve an open model with vLLM, load-test it, and report TTFT and TPOT at p95 and the cost per million tokens.'],
 ['models','Models: fine-tuning and internals','cpu','Lead','Choosing, tuning and compressing models. Optional for most product engineers, essential for platform leads.',['ch3','adv-dl','papers'],'Fine-tune a small model with LoRA on one narrow task and beat a prompted baseline on your eval set.'],
-['platform-leadership','AI platform leadership','building-2','Lead','The gaps between a strong senior engineer and a principal AI platform engineer.',['gaps','ch18','harness','ch19','oreilly','governance'],'Write a platform proposal: a shared gateway, eval service, guardrails and cost controls for five product teams.'],
+['platform-leadership','AI platform leadership','building-2','Lead','The gaps between a strong senior engineer and a principal AI platform engineer.',['gaps','ch18','harness','coding-agents','data-flywheel','ch19','oreilly','governance'],'Write a platform proposal: a shared gateway, eval service, guardrails and cost controls for five product teams.'],
 ['shaping-the-field','Shaping the field','telescope','Shape','Where the field is heading and how to have a view on it: frontier models, agent economics, strategy, governance and your own point of view.',['ch20','frontier','agent-econ','ai-org','governance','pov'],'Publish a 1,500-word point of view on one open question in AI engineering, with evidence from your own experiment.']];
 
 // Old links that must keep working. Section ids (#ch13) redirect automatically.
@@ -83,6 +88,9 @@ const LEGACY={tracker:'progress',map:'flows',guide:'flows'};
 
 // Change log, newest first: [ISO date, title, detail]
 const NEWS=[
+['2026-10-04','Anki cards, notes and depth of knowledge','Flashcards on every topic with a spaced-repetition review and Anki download; notes per topic exported as Markdown; ticked checks can be marked Read, Can explain or Built; a progress link moves your ticks to another device.'],
+['2026-10-04','Better link previews','Copied topic, flow and radar links now show their own title and description when pasted into chat or social media.'],
+['2026-10-04','Technology radar and four new topics','A radar of what to adopt, trial, assess or hold, plus AI-native software development, agent security and identity, evaluating agents, and data flywheels.'],
 ['2026-10-04','Context engineering and harness engineering','Two new topics in Agentic systems, both part of the Agentic systems flow, plus reading-list links to well-known infographic series from ByteByteGo, Daily Dose of Data Science and SwirlAI.'],
 ['2026-10-04','Visual summaries','Infographics on LLM evaluation methods, RAG in production and the silent failure modes of agents, shown on the topics they cover and collected on the Visuals page.'],
 ['2026-10-04','Skill graph in colour, full width','Each level has its own colour, the graph stretches across the screen, and selecting a topic highlights what it builds on and leads to.'],
@@ -101,6 +109,39 @@ const TOPIC_LINKS={sysdesign:['system-design.html','The LLM serving stack, stop 
 // Infographics shown on topic pages and on the Visuals page (#visuals). Files live in assets/img/.
 // [slug, file, title, credit, summary, topic ids, original source URL or '']
 const FIGURES=[
-['llm-evaluation-methods','llm-evaluation-methods.jpg','11 LLM evaluation methods','Avi Chawla, Daily Dose of Data Science','G-Eval, ROUGE, BLEU, LLM-as-judge, BERTScore, human evaluation, multi-turn evaluation, safety evaluation, LLM juries, DAG evaluation and agent trajectory accuracy, each drawn as a short pipeline with what it measures.',['ch6','ch7','ch8','ch9'],'https://blog.dailydoseofds.com/p/11-llm-evaluation-methods'],
-['rag-in-production','rag-in-production.jpg','Design, evaluate, debug and operate RAG in production','@gen_ai_learning','Offline ingestion and online query pipelines, retrieval strategies, retrieval, generation and system metrics with worked recall, precision and MRR examples, a ten-step debugging checklist, what to log, a monitoring dashboard, offline versus online evaluation and common interview questions.',['ch13','knowledge','capstone','graphrag'],''],
-['agent-silent-killers','agent-silent-killers.jpg','9 silent killers of AI agents in production','Prem Natarajan','Tool definition bloat, context window decay, retrieval poisoning, runaway loops, silent schema drift, eval blindness, hidden non-determinism, cost blind spots and no failure mode, each with its fix.',['ch10','ch12','ctx-eng','ch14','harness','ch16','ch18','adv-eng'],'']];
+['llm-evaluation-methods','llm-evaluation-methods.webp','11 LLM evaluation methods','Avi Chawla, Daily Dose of Data Science','G-Eval, ROUGE, BLEU, LLM-as-judge, BERTScore, human evaluation, multi-turn evaluation, safety evaluation, LLM juries, DAG evaluation and agent trajectory accuracy, each drawn as a short pipeline with what it measures.',['ch6','ch7','ch8','ch9'],'https://blog.dailydoseofds.com/p/11-llm-evaluation-methods'],
+['rag-in-production','rag-in-production.webp','Design, evaluate, debug and operate RAG in production','@gen_ai_learning','Offline ingestion and online query pipelines, retrieval strategies, retrieval, generation and system metrics with worked recall, precision and MRR examples, a ten-step debugging checklist, what to log, a monitoring dashboard, offline versus online evaluation and common interview questions.',['ch13','knowledge','capstone','graphrag'],''],
+['agent-silent-killers','agent-silent-killers.webp','9 silent killers of AI agents in production','Prem Natarajan','Tool definition bloat, context window decay, retrieval poisoning, runaway loops, silent schema drift, eval blindness, hidden non-determinism, cost blind spots and no failure mode, each with its fix.',['ch10','ch12','ctx-eng','ch14','harness','ch16','ch18','adv-eng'],'']];
+
+// Technology radar (#radar): an opinionated view of what to adopt, trial, assess or hold. Review it every quarter.
+// [name, quadrant, ring, why, topic id]
+const RADAR_AS_OF='October 2026';
+const RADAR_RINGS=[['adopt','Adopt','Use by default on new work.'],['trial','Trial','Use on a real project where you can measure it.'],['assess','Assess','Worth a spike or a careful read; not yet a default.'],['hold','Hold','Avoid on new work unless you have a specific reason.']];
+const RADAR_QUADRANTS=['Techniques','Practices','Tools and protocols','Models and capabilities'];
+const RADAR=[
+['Hybrid search with reranking','Techniques','adopt','Keyword plus vector retrieval, then a reranker. The most reliable quality gain in RAG.','ch13'],
+['Contextual retrieval','Techniques','adopt','Add document context to each chunk before embedding; cheap to add at ingestion.','ch13'],
+['Stable prefixes for prompt caching','Techniques','adopt','Order prompts so the stable parts come first; large cost and latency savings.','ctx-eng'],
+['Structured outputs','Techniques','adopt','Schema-constrained output is the interface to the next system.','ch5'],
+['Sub-agents for context isolation','Techniques','trial','Keeps the main context clean on long tasks; adds cost and coordination.','ctx-eng'],
+['Speculative decoding','Techniques','trial','Lossless speed-up when self-hosting, especially for predictable output such as code.','sysdesign'],
+['GraphRAG for whole-corpus questions','Techniques','assess','Strong on multi-hop and summary questions; costly to build and refresh.','graphrag'],
+['Fine-tuning before you have evals','Techniques','hold','You cannot tell whether it helped. Build the eval set first.','adv-dl'],
+['Evals in CI on every prompt change','Practices','adopt','The cheapest way to stop regressions reaching users.','ch7'],
+['Weekly error analysis on production traces','Practices','adopt','Look at real failures, cluster them, fix the biggest group.','data-flywheel'],
+['Judges calibrated against human labels','Practices','adopt','An LLM judge is only useful once you know how often it agrees with people.','ch8'],
+['Instruction files for coding agents','Practices','adopt','CLAUDE.md or AGENTS.md: conventions, commands and gotchas in the repo.','coding-agents'],
+['Human approval for irreversible agent actions','Practices','adopt','Payments, deletions and external messages are confirmed by a person.','agent-security'],
+['Repeated runs and pass rates for agents','Practices','trial','Single runs hide non-determinism; report pass rate and spread.','agent-evals'],
+['Shipping on vibe checks','Practices','hold','A few good-looking examples say little about production behaviour.','ch6'],
+['Choosing models from leaderboards alone','Practices','hold','Public benchmarks rarely match your task; test on your own eval set.','ch3'],
+['Model Context Protocol','Tools and protocols','adopt','The default way to expose tools and data to agents; review third-party servers.','ch17'],
+['OpenTelemetry GenAI conventions','Tools and protocols','trial','Vendor-neutral traces for model and tool calls.','ch16'],
+['Self-hosting with vLLM or SGLang','Tools and protocols','trial','Worth it at steady high volume or for data control; needs serving skills.','sysdesign'],
+['Agent-to-agent protocols (A2A)','Tools and protocols','assess','Promising for cross-vendor agents; adoption is still early.','ch17'],
+['Heavy agent frameworks for simple workflows','Tools and protocols','hold','A few function calls are easier to test and debug than a framework.','ch11'],
+['Reasoning models for hard multi-step tasks','Models and capabilities','adopt','Clear gains on planning, maths and code; budget the extra latency.','frontier'],
+['Small distilled models for high-volume steps','Models and capabilities','trial','Large cost savings once production data shows the task is narrow.','frontier'],
+['Routing requests by difficulty','Models and capabilities','trial','Send easy requests to cheap models; measure the router on its own.','ch11'],
+['Computer-use agents in production','Models and capabilities','assess','Improving quickly; still slow and brittle for most workflows.','frontier'],
+['Fully autonomous multi-agent systems','Models and capabilities','assess','Impressive demos; hard to evaluate, debug and secure.','ch15']];

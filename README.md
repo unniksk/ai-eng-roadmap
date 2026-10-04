@@ -14,9 +14,12 @@ system-design.html      standalone interactive guide: the LLM serving stack
 assets/css/style.css    styles (light and dark)
 assets/js/data.js       checklists per topic (edit to change items)
 assets/js/resources.js  reading lists per topic
-assets/js/content.js    topics, levels, flows, Senior lens, change log
+assets/js/content.js    topics, levels, flows, Senior lens, radar, change log
+assets/js/cards.js      Anki cards per topic
 assets/js/icons.js      Lucide icons used by the site (ISC licence)
 assets/js/app.js        router, pages, skill graph, search, progress
+share/                  generated link-preview pages (node tools/build-share-pages.mjs)
+tests/smoke.mjs         route smoke test (Playwright)
 404.html                redirects to the home page
 .nojekyll               tells GitHub Pages to serve files as-is
 ```
