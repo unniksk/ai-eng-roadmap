@@ -29,3 +29,19 @@ function resetAll(){if(confirm('Reset all progress? This cannot be undone.')){st
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800)}
 
 document.addEventListener('DOMContentLoaded',render);
+// Map view: metro line (A) and iceberg depth layers (B), both from live progress
+const STOPS=[['Landscape','ch1 ch2 ch3'],['Design','ch4 ch5'],['Evals','ch6 ch7 ch8 ch9'],['Agents','ch10 ch11 ch12 ch13 ch14 ch15'],['Production','ch16 ch17 ch18'],['Next steps','ch19 ch20'],['Knowledge','knowledge'],['Engineering','adv-eng'],['Deep learning','adv-dl']];
+const ICE=[['Foundation','Surface','ch1 ch2 ch3 ch4 ch5'],['Build reliably','Intermediate','ch6 ch7 ch8 ch9'],['Knowledge systems','Intermediate','ch13 knowledge'],['Production applications','Intermediate','ch16 ch17 ch18 capstone'],['Agentic systems','Advanced · engineering','ch10 ch11 ch12 ch14 ch15 adv-eng'],['Models and infrastructure','Advanced · deep learning','adv-dl']];
+const sec=id=>SECTIONS.find(s=>s.id===id);
+function prog(ids){let k=0,t=0;ids.split(' ').forEach(id=>{const s=sec(id);t+=s.items.length;k+=s.items.filter(i=>st[i[0]]).length});return Math.round(k/t*100)}
+function first(ids){const a=ids.split(' ');return a.find(id=>sec(id).items.some(i=>!st[i[0]]))||a[0]}
+function drawMap(){
+  const nx=STOPS.findIndex(s=>prog(s[1])<100);let g='<path class="ln" d="M40 95H580"/><path class="ln eng" d="M580 95C640 95 630 40 690 40"/><path class="ln dl" d="M580 95C640 95 630 150 690 150"/>';
+  STOPS.forEach(([n,ids],i)=>{const x=i<7?40+i*90:690,y=i<7?95:i==7?40:150,ty=i==7?y-30:y+30,p=prog(ids);
+    g+='<g class="stn'+(i==7?' eng':i==8?' dl':'')+(p==100?' done':p?' wip':'')+'" onclick="go(\''+first(ids)+'\')"><title>'+n+': '+p+'% done</title>'+(i==nx?'<circle class="halo" cx="'+x+'" cy="'+y+'" r="16"/>':'')+'<circle cx="'+x+'" cy="'+y+'" r="9"/><text x="'+x+'" y="'+ty+'">'+n+'</text><text class="p" x="'+x+'" y="'+(ty+14)+'">'+p+'%</text></g>'});
+  metro.innerHTML=g;
+  const nid=nx<0?'':first(STOPS[nx][1]);
+  nextUp.innerHTML=nid?'Next up: <a href="javascript:go(\''+nid+'\')">'+esc(sec(nid).t)+' →</a>':'Every stage done.';
+  ice.innerHTML=ICE.map(([n,lv,ids],i)=>{const p=prog(ids);return (i==1?'<div class="water">waterline · deeper layers below</div>':'')+'<details class="layer" style="width:'+(100-i*5)+'%;--d:'+(8+i*6)+'%"><summary><b>'+n+'</b><em>'+lv+'</em><span class="lbar"><span style="width:'+p+'%"></span></span>'+p+'%</summary><div>'+ids.split(' ').map(id=>'<button onclick="go(\''+id+'\')">'+esc(sec(id).t)+'</button>').join('')+'</div></details>'}).join('');
+}
+function go(id){setView('tracker');toggle(id,true);document.getElementById('sec-'+id).scrollIntoView({behavior:'smooth'})}

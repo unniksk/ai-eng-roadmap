@@ -50,16 +50,15 @@ const observer = new IntersectionObserver(entries => {
 }, {threshold: 0.1, rootMargin: '-10% 0px -80% 0px'});
 chapters.forEach(ch => observer.observe(ch));
 
-// Guide / Tracker switch (hash #tracker deep-links to the tracker)
+// Guide / Map / Tracker switch (#map and #tracker deep-link)
 function setView(v){
-  document.getElementById('guide').hidden=v!=='guide';
-  document.getElementById('tracker').hidden=v!=='tracker';
+  ['guide','map','tracker'].forEach(id=>document.getElementById(id).hidden=id!==v);
   document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
-  if(location.hash==='#tracker'&&v==='guide')history.replaceState(null,'',location.pathname);
-  if(v==='tracker')history.replaceState(null,'','#tracker');
+  history.replaceState(null,'',v==='guide'?location.pathname:'#'+v);
+  if(v==='map')drawMap();
 }
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{setView(b.dataset.view);scrollTo(0,0)});
-if(location.hash==='#tracker')setView('tracker');
+addEventListener('DOMContentLoaded',()=>{if(location.hash==='#tracker'||location.hash==='#map')setView(location.hash.slice(1))});
 
 // Per-chapter progress counts in the sidebar (filled by app.js stats())
 document.querySelectorAll('.nav-chapter,.nav-extra').forEach(a=>a.insertAdjacentHTML('beforeend','<i></i>'));

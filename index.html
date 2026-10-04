@@ -69,7 +69,7 @@
 
 <!-- MAIN CONTENT -->
 <main class="main">
-<div class="topbar"><div class="seg" role="tablist"><button class="on" data-view="guide" role="tab">Guide</button><button data-view="tracker" role="tab">Tracker</button></div></div>
+<div class="topbar"><div class="seg" role="tablist"><button class="on" data-view="guide" role="tab">Guide</button><button data-view="map" role="tab">Map</button><button data-view="tracker" role="tab">Tracker</button></div></div>
 <div id="guide">
 
 <div class="page-header">
@@ -639,6 +639,14 @@
   </div>
 </div>
 
+</div>
+<div id="map" hidden>
+<div class="page-header"><h1>Roadmap map</h1><p>Each stage builds on the last. Click a station or chapter to open its checklist and reading list. The dashed ring marks your next stage.</p></div>
+<div class="part-header"><h2>Route</h2></div>
+<div class="metro"><svg id="metro" viewBox="0 0 740 200" role="img" aria-label="Roadmap route with progress per stage"></svg></div>
+<p id="nextUp"></p>
+<div class="part-header"><h2>Depth</h2></div>
+<div id="ice"></div>
 </div>
 <div id="tracker" hidden>
 <div class="page-header"><h1>Your progress</h1><p>Tick items as you finish them. Progress is saved in this browser only. Use export to back it up.</p></div>
