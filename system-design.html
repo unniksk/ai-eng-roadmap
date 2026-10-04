@@ -6,34 +6,35 @@
 <title>How an LLM answers you: the serving stack, stop by stop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#1B2430; --muted:#55606E; --rule:#D5DAE1;
-  --blue:#2F6FDE; --teal:#0E9473; --amber:#C98A00; --magenta:#C2417A;
-  --blue-soft:#E3ECFC; --teal-soft:#DDF3EC; --amber-soft:#FAF0D6; --magenta-soft:#F8E1EB;
-  --idle:#E6E9EE;
+  /* Matches the roadmap: neutral greys, one blue accent, a slate second tone. */
+  --bg:#F7F8FA; --surface:#FFFFFF; --ink:#14181F; --muted:#5A6372; --rule:#DFE3EA;
+  --blue:#2F5BD3; --teal:#4B5565; --amber:#2F5BD3; --magenta:#4B5565;
+  --blue-soft:#E7ECFA; --teal-soft:#ECEEF2; --amber-soft:#E7ECFA; --magenta-soft:#ECEEF2;
+  --idle:#EEF0F4;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#141A22; --surface:#1C2430; --ink:#E7ECF2; --muted:#9AA6B4; --rule:#334050;
-  --blue:#6E9BF0; --teal:#3CC59F; --amber:#E3B33D; --magenta:#E57AA8;
-  --blue-soft:#1F2F4D; --teal-soft:#15362E; --amber-soft:#3A3018; --magenta-soft:#3D2030; --idle:#2A3442;}}
+  --bg:#0F1218; --surface:#161A22; --ink:#E8EBF0; --muted:#A1A9B7; --rule:#272D38;
+  --blue:#8AA6F5; --teal:#A1A9B7; --amber:#8AA6F5; --magenta:#A1A9B7;
+  --blue-soft:#1D2742; --teal-soft:#222833; --amber-soft:#1D2742; --magenta-soft:#222833; --idle:#1C212B;}}
 :root[data-theme="dark"]{
-  --bg:#141A22; --surface:#1C2430; --ink:#E7ECF2; --muted:#9AA6B4; --rule:#334050;
-  --blue:#6E9BF0; --teal:#3CC59F; --amber:#E3B33D; --magenta:#E57AA8;
-  --blue-soft:#1F2F4D; --teal-soft:#15362E; --amber-soft:#3A3018; --magenta-soft:#3D2030; --idle:#2A3442;}
+  --bg:#0F1218; --surface:#161A22; --ink:#E8EBF0; --muted:#A1A9B7; --rule:#272D38;
+  --blue:#8AA6F5; --teal:#A1A9B7; --amber:#8AA6F5; --magenta:#A1A9B7;
+  --blue-soft:#1D2742; --teal-soft:#222833; --amber-soft:#1D2742; --magenta-soft:#222833; --idle:#1C212B;}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.65}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.65}
 a{color:var(--blue)}
 :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:4px}
 .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
 .read{max-width:70ch}
 header.hero{padding:56px 0 24px}
-.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;font-weight:800;letter-spacing:-0.02em;margin:0 0 16px;max-width:18ch}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;font-weight:700;letter-spacing:-0.02em;margin:0 0 16px;max-width:18ch}
 .hero p.lede{font-size:1.15rem;color:var(--muted);margin:0 0 28px;max-width:60ch}
 .map{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 8px;overflow-x:auto}
 .map svg{display:block;min-width:900px;width:100%;height:auto}
@@ -48,14 +49,15 @@ header.hero{padding:56px 0 24px}
 .seg button{font:inherit;font-size:.92rem;border:0;background:none;color:var(--ink);padding:7px 16px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .line-head{margin:64px 0 8px;display:flex;align-items:center;gap:12px}
-.line-head i{display:block;width:48px;height:8px;border-radius:4px;background:var(--c)}
+.line-head i{display:block;width:28px;height:3px;border-radius:2px;background:var(--c)}
 .line-head h2{margin:0;font-size:1.05rem;font-weight:600;color:var(--muted)}
 section.stop{display:grid;grid-template-columns:56px 1fr;gap:0 18px;padding:28px 0;border-top:1px solid var(--rule)}
+section.stop>div{min-width:0}
 .rail{position:relative;display:flex;justify-content:center}
-.rail::before{content:"";position:absolute;top:0;bottom:-28px;width:8px;background:var(--c);border-radius:4px}
-.dot{position:relative;width:44px;height:44px;border-radius:50%;background:var(--surface);border:6px solid var(--c);display:grid;place-items:center;font-weight:800;font-size:.95rem}
-.stop h3{font-size:clamp(1.4rem,3vw,1.85rem);line-height:1.2;margin:4px 0 14px;font-weight:800;letter-spacing:-0.01em}
-.plain{font-size:1.08rem;max-width:66ch}
+.rail::before{content:"";position:absolute;top:0;bottom:-28px;width:2px;background:var(--rule);border-radius:1px}
+.dot{position:relative;width:44px;height:44px;border-radius:50%;background:var(--surface);border:2px solid var(--c);display:grid;place-items:center;font-weight:700;font-size:.95rem}
+.stop h3{font-size:clamp(1.4rem,3vw,1.85rem);line-height:1.2;margin:4px 0 14px;font-weight:700;letter-spacing:-0.01em}
+.plain{font-family:"Source Serif 4",Georgia,serif;font-size:1.12rem;max-width:66ch}
 .plain p{margin:0 0 12px}
 .tech{margin-top:14px;background:var(--surface);border:1px solid var(--rule);border-left:6px solid var(--c);border-radius:0 10px 10px 0;padding:16px 20px;max-width:76ch;font-size:.98rem}
 .tech h4{margin:0 0 6px;font-size:.95rem;font-weight:600;color:var(--muted)}
@@ -72,7 +74,7 @@ svg .sub{fill:var(--muted);font-size:12px}
 svg .wire{stroke:var(--muted);stroke-width:1.5;fill:none}
 .stat{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
 .stat div{flex:1 1 180px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 14px}
-.stat b{display:block;font-size:1.5rem;font-weight:800;line-height:1.2}
+.stat b{display:block;font-size:1.5rem;font-weight:700;line-height:1.2}
 .stat span{font-size:.88rem;color:var(--muted)}
 .tool{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px;margin:18px 0}
 .tool h4{margin:0 0 12px;font-size:1.05rem}
@@ -80,7 +82,7 @@ svg .wire{stroke:var(--muted);stroke-width:1.5;fill:none}
 label.f{display:flex;flex-direction:column;font-size:.88rem;color:var(--muted);gap:4px}
 select,input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:7px 10px;width:100%}
 .out{margin-top:16px;font-size:1.05rem}
-.out b{font-size:1.9rem;font-weight:800}
+.out b{font-size:1.9rem;font-weight:700}
 .bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px;background:var(--idle)}
 .bar i{display:block;height:100%}
 .keys{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted)}
@@ -102,8 +104,8 @@ dl.gloss{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:6px 18px
 dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
 @media (max-width:640px){
   section.stop{grid-template-columns:36px 1fr;gap:0 12px}
-  .dot{width:32px;height:32px;border-width:5px;font-size:.8rem}
-  .rail::before{width:6px}
+  .dot{width:32px;height:32px;border-width:2px;font-size:.8rem}
+  .rail::before{width:2px}
   dl.gloss{grid-template-columns:1fr}
   dl.gloss dd{margin-bottom:8px}
   .lane{grid-template-columns:44px repeat(16,1fr)}
@@ -112,12 +114,56 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
   #traveller{animation:travel 6s ease-in-out .4s 1 both}
   @keyframes travel{from{offset-distance:0%}to{offset-distance:100%}}
 }
+/* left-hand section nav */
+.side{position:fixed;top:0;left:0;bottom:0;width:250px;overflow-y:auto;background:var(--surface);border-right:1px solid var(--rule);padding:calc(env(safe-area-inset-top,0px) + 18px) 12px 32px;z-index:6;font-size:.9rem;display:none}
+.side .home{display:block;font-weight:600;text-decoration:none;padding:4px 8px 12px;border-bottom:1px solid var(--rule)}
+.side .grp{display:flex;align-items:center;gap:8px;margin:18px 8px 6px;font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.side .grp i{flex:none;width:18px;height:5px;border-radius:3px;background:var(--c)}
+.side a.s{display:flex;align-items:center;gap:10px;padding:5px 8px;border-radius:8px;color:var(--ink);text-decoration:none;line-height:1.3}
+.side a.s b{flex:none;width:24px;height:24px;border-radius:50%;border:3px solid var(--c);display:grid;place-items:center;font-size:.7rem;font-weight:700}
+.side a.s:hover{background:var(--idle)}
+.side a.s[aria-current="true"]{background:var(--idle);font-weight:600}
+.side .close,.sidebtn{font:inherit;font-size:.92rem;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:7px 16px;cursor:pointer}
+.side .close{float:right;padding:4px 12px;font-size:.85rem}
+.side.open{display:block;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
+@media (min-width:1200px){
+  .side{display:block}.side .close,.sidebtn{display:none}
+  body{padding-left:250px}
+}
+.hl{margin-left:8px;color:var(--muted);text-decoration:none;font-weight:400;opacity:0;transition:opacity .12s}
+h2:hover .hl,h3:hover .hl,.hl:focus-visible{opacity:1}
+@media (hover:none){.hl{opacity:.5}}
+@media (min-width:1200px){.backlink{display:none}}
 </style>
 </head>
 <body data-mode="both">
+<nav class="side" id="side" aria-label="Sections">
+  <button type="button" class="close" aria-controls="side">Close</button>
+  <a class="home" href="index.html#topic/llm-serving">&larr; AI Engineering Roadmap</a>
+  <div class="grp" style="--c:var(--blue)"><i></i>Request path</div>
+  <a class="s" href="#client" style="--c:var(--blue)"><b>1</b>Your app</a>
+  <a class="s" href="#gateway" style="--c:var(--blue)"><b>2</b>Gateway</a>
+  <a class="s" href="#router" style="--c:var(--blue)"><b>3</b>Router</a>
+  <div class="grp" style="--c:var(--teal)"><i></i>Inside the GPU</div>
+  <a class="s" href="#scheduler" style="--c:var(--teal)"><b>4</b>Batching</a>
+  <a class="s" href="#kv" style="--c:var(--teal)"><b>5</b>KV cache</a>
+  <a class="s" href="#phases" style="--c:var(--teal)"><b>6</b>Read & write</a>
+  <a class="s" href="#parallel" style="--c:var(--teal)"><b>7</b>Split model</a>
+  <a class="s" href="#speed" style="--c:var(--teal)"><b>8</b>Speed tricks</a>
+  <div class="grp" style="--c:var(--amber)"><i></i>Scaling</div>
+  <a class="s" href="#disagg" style="--c:var(--amber)"><b>9</b>Split pools</a>
+  <a class="s" href="#autoscale" style="--c:var(--amber)"><b>10</b>Autoscaling</a>
+  <a class="s" href="#sizing" style="--c:var(--amber)"><b>11</b>GPU sizing</a>
+  <div class="grp" style="--c:var(--magenta)"><i></i>Sharing and cost</div>
+  <a class="s" href="#tenancy" style="--c:var(--magenta)"><b>12</b>Sharing safely</a>
+  <a class="s" href="#cost" style="--c:var(--magenta)"><b>13</b>Cost</a>
+  <div class="grp" style="--c:var(--muted)"><i></i>Reference</div>
+  <a class="s" href="#glossary" style="--c:var(--rule)"><b>G</b>Glossary</a>
+  <a class="s" href="#sources" style="--c:var(--rule)"><b>S</b>Sources</a>
+</nav>
 
 <header class="hero"><div class="wrap">
-  <p style="margin:0 0 20px"><a href="index.html#sysdesign">&larr; AI Engineering Roadmap</a></p>
+  <p class="backlink" style="margin:0 0 20px"><a href="index.html#topic/llm-serving">&larr; AI Engineering Roadmap</a></p>
   <h1>What happens between "send" and the first word of the reply</h1>
   <p class="lede">Follow one message through the machinery that runs a large language model in production: from your app, through the traffic layers, onto the GPUs, and back as a stream of words. Every stop has a plain-English explanation and a technical one.</p>
   <div class="map" role="navigation" aria-label="Journey map: jump to any stop">
@@ -140,6 +186,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
 </div></header>
 
 <div class="modebar"><div class="wrap">
+  <button type="button" class="sidebtn" aria-controls="side" aria-expanded="false">Sections</button>
   <strong id="modeLbl">Reading level</strong>
   <div class="seg" role="group" aria-labelledby="modeLbl">
     <button type="button" data-m="plain" aria-pressed="false">Plain English</button>
@@ -150,7 +197,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
 
 <main class="wrap">
 
-<div class="line-head" style="--c:var(--blue)"><i></i><h2>Request path: getting your message to the right machine</h2></div>
+<div class="line-head" id="request-path" style="--c:var(--blue)"><i></i><h2>Request path: getting your message to the right machine</h2></div>
 
 <section class="stop" id="client" style="--c:var(--blue)">
   <div class="rail"><div class="dot">1</div></div>
@@ -220,7 +267,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
   </div>
 </section>
 
-<div class="line-head" style="--c:var(--teal)"><i></i><h2>Inside the GPU: how one server turns text into tokens</h2></div>
+<div class="line-head" id="inside-the-gpu" style="--c:var(--teal)"><i></i><h2>Inside the GPU: how one server turns text into tokens</h2></div>
 
 <section class="stop" id="scheduler" style="--c:var(--teal)">
   <div class="rail"><div class="dot">4</div></div>
@@ -333,7 +380,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
   </div>
 </section>
 
-<div class="line-head" style="--c:var(--amber)"><i></i><h2>Scaling: from one server to a fleet</h2></div>
+<div class="line-head" id="scaling" style="--c:var(--amber)"><i></i><h2>Scaling: from one server to a fleet</h2></div>
 
 <section class="stop" id="disagg" style="--c:var(--amber)">
   <div class="rail"><div class="dot">9</div></div>
@@ -432,7 +479,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
   </div>
 </section>
 
-<div class="line-head" style="--c:var(--magenta)"><i></i><h2>Sharing and cost: many customers, one set of chips</h2></div>
+<div class="line-head" id="sharing-and-cost" style="--c:var(--magenta)"><i></i><h2>Sharing and cost: many customers, one set of chips</h2></div>
 
 <section class="stop" id="tenancy" style="--c:var(--magenta)">
   <div class="rail"><div class="dot">12</div></div>
@@ -492,7 +539,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
 </main>
 
 <footer><div class="wrap">
-  <h2>Glossary</h2>
+  <h2 id="glossary">Glossary</h2>
   <dl class="gloss">
     <dt>Token</dt><dd>A chunk of text, roughly three-quarters of an English word. Models read and write in tokens.</dd>
     <dt>Prefill</dt><dd>Reading the whole prompt in one pass. Sets the wait before the first word.</dd>
@@ -506,7 +553,7 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
     <dt>LoRA</dt><dd>A small add-on that customises a shared base model without copying it.</dd>
   </dl>
 
-  <h2>Sources</h2>
+  <h2 id="sources">Sources</h2>
   <ol>
     <li><a href="https://docs.vllm.ai/en/latest/design/arch_overview/">vLLM architecture overview</a></li>
     <li><a href="https://www.techinterview.org/post/3233476388/designing-an-llm-serving-system/">Designing an LLM serving system that hits its latency budget</a></li>
@@ -544,8 +591,28 @@ dl.gloss dt{font-weight:600}dl.gloss dd{margin:0;color:var(--muted)}
     a.appendChild(tl);a.appendChild(c);a.appendChild(t);a.appendChild(n);g.appendChild(a);
   });
 
+  /* every section heading gets a copyable link */
+  document.querySelectorAll("section.stop[id] h3, .line-head[id] h2, footer h2[id]").forEach(function(h){
+    var id=h.closest("[id]").id,a=document.createElement("a");a.className="hl";a.href="#"+id;a.textContent="#";a.setAttribute("aria-label","Copy link to this section");
+    a.addEventListener("click",function(){try{navigator.clipboard.writeText(location.href.split("#")[0]+"#"+id).catch(function(){})}catch(e){}});h.appendChild(a)});
+
+  /* left-hand section nav: mobile toggle and current-section highlight */
+  var side=document.getElementById("side"),sb=document.querySelector(".sidebtn");
+  function setSide(o){side.classList.toggle("open",o);sb.setAttribute("aria-expanded",o?"true":"false")}
+  sb.addEventListener("click",function(){setSide(!side.classList.contains("open"))});
+  side.querySelector(".close").addEventListener("click",function(){setSide(false)});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")setSide(false)});
+  var links=side.querySelectorAll("a.s");
+  links.forEach(function(a){a.addEventListener("click",function(){setSide(false)})});
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){
+      links.forEach(function(a){a.setAttribute("aria-current",a.getAttribute("href")==="#"+e.target.id?"true":"false")});}})},
+      {rootMargin:"-20% 0px -70% 0px"});
+    links.forEach(function(a){var t=document.querySelector(a.getAttribute("href"));if(t)io.observe(t)});
+  }
+
   /* reading mode */
-  var mb=document.querySelectorAll(".modebar button");
+  var mb=document.querySelectorAll(".modebar [data-m]");
   mb.forEach(function(b){b.addEventListener("click",function(){
     document.body.setAttribute("data-mode",b.dataset.m);
     mb.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false")});

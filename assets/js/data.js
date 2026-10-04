@@ -256,4 +256,40 @@ window.TRACKER_SECTIONS=[
 ['sd-10','GPU sizing for a model and workload','Weights + KV cache + overhead per replica, then replicas for traffic.'],
 ['sd-11','Multi-tenancy and cache isolation','Shared read-only weights, per-tenant cache salt, LoRA adapters per customer.'],
 ['sd-12','Cost per million tokens','GPU-hour price over tokens per hour; the levers that move it.']]}
+,
+{id:'frontier',c:'ck',isNew:1,part:'Part 9 · Shaping the field',t:'Frontier · Reasoning models and test-time compute',d:'What changed with reasoning models, how far agents can run, and how to track the frontier without the hype.',items:[
+['fr-1','Reasoning models and how they are trained','Reinforcement learning on verifiable rewards; read the DeepSeek-R1 report end to end.'],
+['fr-2','Test-time compute scaling','When thinking longer beats a bigger model, and how to budget reasoning tokens per request.'],
+['fr-3','Long-horizon agents','The length of tasks agents can finish keeps growing; what that means for product scope.'],
+['fr-4','Small models and distillation','When a distilled small model is enough, and what you give up in quality, latency and cost.'],
+['fr-5','Multimodal and computer-use models','Screens, voice and documents as inputs, and the new failure modes they bring.'],
+['fr-6','Tracking the frontier without hype','Public benchmarks versus your own evals; trend sources you can trust.']]},
+{id:'agent-econ',c:'ck',isNew:1,t:'Agent economics and AI-native products',d:'Cost per task, when not to use an agent, human-in-the-loop design and products that survive model churn.',items:[
+['ae-1','Unit economics of an AI feature','Cost per completed task, not per token; margin as usage grows.'],
+['ae-2','When not to use an agent','A fixed workflow beats an agent when the path is known.'],
+['ae-3','Human-in-the-loop design','Where approval steps go, and how to raise autonomy safely over time.'],
+['ae-4','Pricing AI products','Seat, usage and outcome pricing, and who carries the model cost.'],
+['ae-5','Designing for model churn','A model layer you can swap, with upgrades gated by evals.'],
+['ae-6','AI-native UX patterns','Streaming, citations, undo and showing uncertainty honestly.']]},
+{id:'ai-org',c:'ck',isNew:1,t:'AI platform strategy and org design',d:'Build versus buy, paved-road platforms, written strategy and measuring impact.',items:[
+['ao-1','Build vs buy vs fine-tune','A decision framework across cost, control, speed and risk.'],
+['ao-2','A central AI platform','Paved roads: gateway, evals, guardrails, observability and cost controls as shared services.'],
+['ao-3','Writing an engineering strategy','Diagnosis, guiding policy and concrete actions, on one page.'],
+['ao-4','Measuring AI impact','Adoption, quality, cost and time saved; avoid vanity metrics.'],
+['ao-5','Hiring and growing AI engineers','A skills matrix and an interview loop that tests judgment, not trivia.'],
+['ao-6','Roadmaps when models change monthly','Bets with explicit exit criteria and review dates.']]},
+{id:'governance',c:'ck',isNew:1,t:'Safety, governance and regulation',d:'Risk tiers, management frameworks, privacy, documentation and incident response for AI systems.',items:[
+['gv-1','EU AI Act risk tiers','What counts as high risk, and the duties of providers and deployers.'],
+['gv-2','NIST AI Risk Management Framework','Govern, map, measure, manage, applied to one of your systems.'],
+['gv-3','ISO/IEC 42001','AI management systems, and what an auditor looks for.'],
+['gv-4','Data privacy for LLM apps','PII handling, retention, and training opt-outs with each provider.'],
+['gv-5','Model and system cards','Documenting intended use, limits and evaluation results.'],
+['gv-6','Incident response for AI systems','Detection, rollback, user communication and the postmortem.']]},
+{id:'pov',c:'ck',isNew:1,t:'Your technical point of view',d:'Turn experience into influence: own a question, write, publish, and teach.',items:[
+['pv-1','Pick a question you will own','One open problem in your domain that you can test and write about.'],
+['pv-2','Write a design memo','One page: the decision, the options, the evidence, the recommendation.'],
+['pv-3','Publish an experiment','A reproducible repo or notebook with an eval, not just a demo.'],
+['pv-4','Give a talk or write a post','Internal first, then public.'],
+['pv-5','Contribute to open source','An eval, a bug fix or docs for a project you depend on.'],
+['pv-6','Run design reviews','Use the Senior lens questions on other teams\' designs.']]}
 ];
